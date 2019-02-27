@@ -30,17 +30,11 @@ class Topmodel:
                  saturated_hydraulic_conductivity,
                  macropore_fraction,
                  soil_depth_total,
-
+                 soil_depth_ab_horizon,
                  field_capacity_fraction,
                  latitude,
                  basin_area_total,
                  impervious_area_fraction,
-                 snowmelt_temperature_cutoff,
-                 snowmelt_rate_coeff,
-                 snowmelt_rate_with_rain_coeff,
-                 channel_length_max,
-                 channel_velocity_avg,
-                 flow_initial,
                  twi_values,
                  twi_saturated_areas,
                  twi_mean,
@@ -66,13 +60,6 @@ class Topmodel:
         self.latitude = latitude
         self.basin_area_total = basin_area_total
         self.impervious_area_fraction = impervious_area_fraction
-        self.snowmelt_temperature_cutoff = snowmelt_temperature_cutoff
-        self.snowmelt_rate_coeff = snowmelt_rate_coeff
-        self.snowmelt_rate_with_rain_coeff = snowmelt_rate_with_rain_coeff
-        self.channel_length_max = channel_length_max
-        self.channel_velocity_avg = (channel_velocity_avg 
-                                     * self.timestep_daily_fraction)
-        self.flow_initial = flow_initial * self.timestep_daily_fraction
 
         # Assign twi
         self.twi_values = twi_values
@@ -95,7 +82,9 @@ class Topmodel:
         self.flow_predicted = utils.nans(self.num_timesteps)
 
         # Soil hydraulic variables
-        self.soil_depth_roots = None
+        # Soil depth of root zone approximated as 1 meter, and could be
+        # approximated as soil_depth_ab_horizon if wanted
+        self.soil_depth_roots = 1
         self.soil_depth_c_horizon = None
         self.vertical_drainage_flux_initial = None
         self.vertical_drainage_flux = None
@@ -104,7 +93,12 @@ class Topmodel:
         self.root_zone_storage_max = None
 
         # Channel routing parameters
+        self.channel_velocity_avg = None
+        self.channel_length_max = None
         self.channel_travel_time = None
+
+        # Initial flow approximation as 1 mm/day
+        self.flow_initial = 1 * self.timestep_daily_fraction
 
         # Watershed average storage deficit
         self.saturation_deficit_avgs = utils.nans(self.num_timesteps)
@@ -156,9 +150,6 @@ class Topmodel:
     def _initialize_soil_hydraulic_parameters(self):
         """Initialize the soil hydraulic parameters."""
 
-        # Soil depths and initial vertical drainage flux
-        self.soil_depth_roots = 1
-
         if self.soil_depth_roots > self.soil_depth_total:
             self.soil_depth_roots = self.soil_depth_total
 
@@ -166,13 +157,14 @@ class Topmodel:
             self.soil_depth_total - self.soil_depth_ab_horizon
         )
 
+        # Initial vertical drainage flux as saturated hydraulic conductivity
         self.vertical_drainage_flux_initial = (
             self.saturated_hydraulic_conductivity
             * self.timestep_daily_fraction
         )
 
         # Maximum saturated hydraulic transmissivity
-        # - equation 41 in Wolock, 1993
+        # Equation 41 in Wolock, 1993
         # Note: it is assumed that the hydraulic conductivity of the AB
         # horizon is two orders of magnitude greater than the hydraulic
         # conductivity of the Z horizon
@@ -200,11 +192,12 @@ class Topmodel:
         """Initialize the channel routing parameters."""
 
         # Channel velocity
-        self.channel_velocity_avg = (
-            self.channel_velocity_avg * self.timestep_daily_fraction
-        )
+        self.channel_velocity_avg = 10 * self.timestep_daily_fraction
 
-        # equation 38 in Wolock, 1993
+        # Channel length maximum approximation as 2 * radius of circle
+        self.channel_length_max = 2 * np.sqrt(self.basin_area_total / np.pi)
+
+        # Equation 38 in Wolock, 1993
         self.channel_travel_time = (
             self.channel_length_max / self.channel_velocity_avg
         )
