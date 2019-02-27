@@ -1,0 +1,16 @@
+# Byte-compiled / optimized / DLL files
+.cache/
+__pycache__/
+*.py[cod]
+*$py.class
+*.py.swp
+.pytest_cache/
+
+# Sphinx documentation
+docs/_build
+
+# Distribution / packaging
+*.egg-info/
+
+# Virtual environment
+venv/
