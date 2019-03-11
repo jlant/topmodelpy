@@ -6,6 +6,9 @@ Class that represents an implementation of a rainfall-runoff model,
 called Topmodel, based on a `U.S. Geological Survey`_ version by
 David Wolock (please see `[1]`_).
 
+Please see table in docs directory called "lant-to-wolock-conversion-table.rst"
+which contains variable descriptions and units
+
 .. [1] Wolock, D.M., "Simulating the variable-source-area concept of
 streamflow generation with the watershed model Topmodel", U.S. Geological
 Survey, Water-Resources Investigations Report 93-4124, 1993.
@@ -19,11 +22,13 @@ Survey, Water-Resources Investigations Report 93-4124, 1993.
 import math
 import numpy as np
 
-import utils
+from . import utils
 
 
 class Topmodel:
-    """Class that represents a Topmodel implementation by David Wolock."""
+    """Class that represents a Topmodel based rainfall-runoff model
+    implementation by David Wolock.
+    """
 
     def __init__(self,
                  scaling_parameter,
@@ -40,6 +45,8 @@ class Topmodel:
                  twi_mean,
                  precip,
                  pet,
+                 flow_initial=1,
+                 soil_depth_roots=1,
                  timestep_daily_fraction=1):
 
         # Check and assign timestep daily fraction
@@ -65,6 +72,7 @@ class Topmodel:
         self.twi_values = twi_values
         self.twi_saturated_areas = twi_saturated_areas
         self.twi_mean = twi_mean
+        self.num_twi_increments = len(self.twi_values)
 
         # Check and assign precip and potential evapotranspiration (pet)
         assert len(precip) == len(pet), (
@@ -82,9 +90,8 @@ class Topmodel:
         self.flow_predicted = utils.nans(self.num_timesteps)
 
         # Soil hydraulic variables
-        # Soil depth of root zone approximated as 1 meter, and could be
-        # approximated as soil_depth_ab_horizon if wanted
-        self.soil_depth_roots = 1
+        # Note: soil depth of root zone has default value of 1 meter
+        self.soil_depth_roots = soil_depth_roots
         self.soil_depth_c_horizon = None
         self.vertical_drainage_flux_initial = None
         self.vertical_drainage_flux = None
@@ -97,8 +104,9 @@ class Topmodel:
         self.channel_length_max = None
         self.channel_travel_time = None
 
-        # Initial flow approximation as 1 mm/day
-        self.flow_initial = 1 * self.timestep_daily_fraction
+        # Initial flow
+        # Note: initial flow has default value of 1 mm/day
+        self.flow_initial = flow_initial * self.timestep_daily_fraction
 
         # Watershed average storage deficit
         self.saturation_deficit_avgs = utils.nans(self.num_timesteps)
