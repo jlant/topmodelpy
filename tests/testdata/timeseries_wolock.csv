@@ -1,4 +1,4 @@
-date, temperature,precip,pet,precip_minus_pet,flow_observed,flow_predicted
+date, temperature,precipitation,pet,precip_minus_pet,flow_observed,flow_predicted
 1980-01-22,-1.9,2.5,0.39,2.11,1.18,1.48
 1980-01-23,-0.3,0,0.44,-0.44,1.02,0.77
 1980-01-24,-1.1,0,0.42,-0.42,0.66,0.69

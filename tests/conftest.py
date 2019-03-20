@@ -7,20 +7,20 @@ import pytest
 
 
 @pytest.fixture(scope="module")
-def wolock_timeseries_data():
+def timeseries_wolock():
     """Return a Pandas dataframe of timeseries test data
     from Dave Wolock's Topmodel version. Test data contains
     input values along with model output values in a single file.
     """
 
     fname = os.path.join(os.path.dirname(__file__),
-                         "testdata/wolock_input_output_timeseries.csv")
+                         "testdata/timeseries_wolock.csv")
     data = pd.read_csv(fname,
                        names=["date",
-                              "precipitation",
                               "temperature",
-                              "precip_minus_pet",
+                              "precipitation",
                               "pet",
+                              "precip_minus_pet",
                               "flow_observed",
                               "flow_predicted"],
                        header=0)  # skip header
@@ -29,12 +29,12 @@ def wolock_timeseries_data():
 
 
 @pytest.fixture(scope="module")
-def wolock_twi_data():
+def twi_wolock():
     """Return a Pandas dataframe of twi test data
     from Dave Wolock's Topmodel version"""
 
     fname = os.path.join(os.path.dirname(__file__),
-                         "testdata/wolock_twi.csv")
+                         "testdata/twi_wolock.csv")
     data = pd.read_csv(fname,
                        names=["bin",
                               "twi",
@@ -46,12 +46,12 @@ def wolock_twi_data():
 
 
 @pytest.fixture(scope="module")
-def wolock_twi_weighted_mean():
+def twi_weighted_mean_wolock():
     """Return the weighted mean of the twi test data
     from Dave Wolock's Topmodel version"""
 
     fname = os.path.join(os.path.dirname(__file__),
-                         "testdata/wolock_twi.csv")
+                         "testdata/twi_wolock.csv")
     data = pd.read_csv(fname,
                        names=["bin",
                               "twi",
@@ -68,7 +68,7 @@ def wolock_twi_weighted_mean():
 
 
 @pytest.fixture(scope="module")
-def wolock_parameters_data():
+def parameters_wolock():
     """Return a dictionary of parameter test data
     from Dave Wolock's Topmodel version"""
 

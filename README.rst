@@ -5,14 +5,22 @@
 topmodelpy
 ===============================
 
-topmodelpy is a command line interface for a rainfall-runoff model, 
-called Topmodel, that predicts the amount of water flow in rivers.
+*topmodelpy* is a rainfall-runoff model that predicts the amount of water
+flow in rivers. *topmodelpy* is a command line application written in Python
+using Click_, and is a complete conversion of the original rainfall-runoff
+model, called Topmodel, from Fortran to Python. The specific version of 
+Topmodel that *topmodelpy* is based on is the version by David Wolock, 
+U.S. Geological Survey. Please see report below for more details: 
+
+        Wolock, D.M., "Simulating the variable-source-area concept of
+        streamflow generation with the watershed model Topmodel", U.S. Geological
+        Survey, Water-Resources Investigations Report 93-4124, 1993.
 
 
 Features
 --------
 
-Add a list of features.
+* Written entirely in Python for ease of use and model extension.
 
 
 Example
@@ -130,6 +138,7 @@ Jeremiah Lant <jlant@usgs.gov>
 
 .. _Python: https://www.python.org/
 .. _pytest: http://pytest.org/latest/
+.. _Click: https://click.palletsprojects.com/
 .. _Sphinx: http://sphinx-doc.org/
 .. _public domain: https://en.wikipedia.org/wiki/Public_domain
 .. _CC0 1.0: http://creativecommons.org/publicdomain/zero/1.0/

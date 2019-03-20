@@ -1,7 +1,4 @@
-"""
-topmodelpy.topmodel
-~~~~~~~~~~~~~~~~~~~
-
+"""Topmodel class
 Class that represents an implementation of a rainfall-runoff model,
 called Topmodel, based on a `U.S. Geological Survey`_ version by
 David Wolock (please see `[1]`_).
@@ -43,18 +40,18 @@ class Topmodel:
                  twi_values,
                  twi_saturated_areas,
                  twi_mean,
-                 precip,
-                 pet,
+                 precip_available,
                  flow_initial=1,
                  soil_depth_roots=1,
                  timestep_daily_fraction=1):
 
         # Check and assign timestep daily fraction
-        assert timestep_daily_fraction <= 1, (
-            "Incorrect timestep: {} \n",
-            "Timestep daily fraction must be less than or equal to 1.",
-            "".format(timestep_daily_fraction))
-
+        if timestep_daily_fraction > 1:
+            raise ValueError(
+                "Incorrect timestep: {} \n",
+                "Timestep daily fraction must be less than or equal to 1.",
+                "".format(timestep_daily_fraction)
+            )
         self.timestep_daily_fraction = timestep_daily_fraction
 
         # Assign parameters
@@ -75,16 +72,8 @@ class Topmodel:
         self.num_twi_increments = len(self.twi_values)
 
         # Check and assign precip and potential evapotranspiration (pet)
-        assert len(precip) == len(pet), (
-            "Length of precip array: {0} \n",
-            "Length of pet array: {1} \n",
-            "Lengths of precip and pet must be equal.".format(len(precip),
-                                                              len(pet)))
-
-        self.precip = precip
-        self.pet = pet
-        self.precip_minus_pet = self.precip - self.pet
-        self.num_timesteps = len(self.precip)
+        self.precip_available = precip_available
+        self.num_timesteps = len(self.precip_available)
 
         # Initialize total predicted flow array with nan
         self.flow_predicted = utils.nans(self.num_timesteps)
@@ -125,7 +114,7 @@ class Topmodel:
                                                      self.num_twi_increments))
 
         self.saturation_deficit_local = None
-        self.precip_for_evapotranspiration = None
+        self.precip_for_evaporation = None
         self.precip_for_recharge = None
         self.precip_excesses = None
         self.precip_excess = None
@@ -239,7 +228,6 @@ class Topmodel:
 
         # Start of timestep loop
         for i in range(self.num_timesteps):
-
             # Initialize predicted flows, precipitation in excess
             # of evapotranspiration and field-capacity storage, and
             # local saturation deficit
@@ -249,18 +237,22 @@ class Topmodel:
             self.saturation_deficit_local = utils.nans(self.num_twi_increments)
 
             # Assign water available for evapotranspiration and
-            # water available recharge based on how precipitation
+            # water available for recharge based on how precipitation
             # compares to potential evapotranspiration
-            self.precip_for_evapotranspiration = 0
+            # If precip_available < 0 => moisture has to be taken out of soil
+            # to meet the pet demand
+            # If precip_available > 0 => then surplus precip soaks into the
+            # ground to recharge soil moisture and any left over after that
+            # runs off as streamflow
+            # If precip_available = 0 => no surplus precip
+            self.precip_for_evaporation = 0
             self.precip_for_recharge = 0
-
-            if self.precip_minus_pet[i] < 0:
-                self.precip_for_evapotranspiration = (
-                    -1 * self.precip_minus_pet[i]
+            if self.precip_available[i] < 0:
+                self.precip_for_evaporation = (
+                    -1 * self.precip_available[i]
                 )
-
-            elif self.precip_minus_pet[i] > 0:
-                self.precip_for_recharge = self.precip_minus_pet[i]
+            elif self.precip_available[i] > 0:
+                self.precip_for_recharge = self.precip_available[i]
 
             # Start of twi increments loop
             for j in range(self.num_twi_increments):
@@ -420,10 +412,10 @@ class Topmodel:
 
                 # Evaporation from soil root zone storage
                 # =======================================
-                # If there is precipitation available for evapotranspiration,
+                # If there is precipitation available for evaporation,
                 # then compute evaporation.
-                if self.precip_for_evapotranspiration > 0:
-                    self.evaporation = self.precip_for_evapotranspiration
+                if self.precip_for_evaporation > 0:
+                    self.evaporation = self.precip_for_evaporation
 
                     # If the precipitation available for evapotranspiration is
                     # greater than the soil root zone storage amount, then

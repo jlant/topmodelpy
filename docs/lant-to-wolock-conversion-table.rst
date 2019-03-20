@@ -27,7 +27,7 @@ twi_mean                                       TL                        Mean of
 num_twi_increments                             NAC                       Number of twi increments or bins                                     ---                                                     
 precip                                         PP,P,PPT                  Precipitation rate                                                   millimeters/day                                       
 pet                                            PET                       Potential evapotranspiration rate                                    millimeters/day                millimeters in Wolock     
-precip_minus_pet                               PPTPET                    Precipiation - Potential evapotranspiration                          millimeters/day
+precip_available                               PPTPET                    Precipiation - Potential evapotranspiration                          millimeters/day
 num_timesteps                                  NSTEPS                    Number of timesteps; number of precipitation data values             ---
 flow_predicted                                 QPRED                     Total predicted flow                                                 millimeters/day
 soil_depth_roots                               ZROOT                     Root-zone depth                                                      meters
@@ -41,8 +41,8 @@ vertical_drainage_flux                         UZ                        Vertica
 unsaturated_zone_storage                       SUZ                       Soil water available for drainage                                    millimeters
 root_zone_storage                              SRZ                       Root zone storage                                                    millimeters
 saturation_deficit_local                       SD                        Saturation deficit at location x                                     millimeters
-precip_available_for_evapotranspiration        EPC                       The negative of precip minus pet                                     millimeters/day                -PPTPET in Wolock
-precip_available_for_recharge                  PP                        The positive of precip minus pet                                     millimeters/day                PPTPET in Wolock
+precip_for_evaporation                         EPC                       The negative of precip minus pet                                     millimeters/day                -PPTPET in Wolock
+precip_for_recharge                            PP                        The positive of precip minus pet                                     millimeters/day                PPTPET in Wolock
 precip_excesses                                EX                        Precip in excess of pet and field capacity storage                   millimeters                    array
 precip_excess                                  PPEX                      Precip in excess of pet and field capacity storage                   millimeters                    float
 flow_predicted_overland                        QOF                       Predicted overland flow                                              millimeters/day
