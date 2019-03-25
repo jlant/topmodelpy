@@ -1,5 +1,6 @@
 """Test configurations and fixtures."""
 
+from configparser import ConfigParser, ExtendedInterpolation
 import os
 import numpy as np
 import pandas as pd
@@ -91,3 +92,50 @@ def parameters_wolock():
     }
 
     return data
+
+
+@pytest.fixture(scope="module")
+def model_config_obj():
+    config = ConfigParser(interpolation=ExtendedInterpolation())
+    config["Inputs"] = {
+        "input_dir": "./inputs",
+        "parameters_file": "${Inputs:input_dir}/parameters.csv",
+        "climate_file": "${Inputs:input_dir}/climate.csv",
+        "twi_file": "${Inputs:input_dir}/twi.csv",
+    }
+
+    config["Outputs"] = {
+        "output_dir": "./outputs",
+    }
+
+    config["Options"] = {
+        "option_pet": "hamon",
+        "option_snowmelt_with_precip": "heavily_forested",
+        "option_snowmelt_with_no_precip": "temperature_index",
+    }
+
+    return config
+
+
+@pytest.fixture(scope="module")
+def modelconfig_obj_bad_paths():
+
+    from configparser import ConfigParser, ExtendedInterpolation
+
+    config = ConfigParser(interpolation=ExtendedInterpolation())
+
+    config["Inputs"] = {
+        "basin_chars_csv_file": __file__,
+        "input_dir": "/some/path/that/does/not/exist",
+        "pet_csv_file": "",
+    }
+
+    config["Outputs"] = {
+        "output_dir": "/home/jlantl/jeremiah/projects/waterpy/data/outputs",
+    }
+
+    config["Options"] = {
+        "pet_hamon": "yes",
+    }
+
+    return config
