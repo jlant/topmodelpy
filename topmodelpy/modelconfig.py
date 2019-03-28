@@ -81,10 +81,6 @@ def check_config_filepaths(config):
 
 def check_config_options(config):
     """Check that all the options are valid."""
-    valid_options_pet = ["hamon"]
-    valid_options_snowmelt_with_precip = ["heavily_forested",
-                                          "partly_forested"]
-    valid_options_snowmelt_with_no_precip = ["temperature_index"]
     valid_options = {
         "pet": ["hamon"],
         "snowmelt_with_precip": ["heavily_forested", "partly_forested"],
@@ -104,8 +100,3 @@ def check_config_options(config):
     for key in valid_options.keys() and options.keys():
         if options[key] not in valid_options[key]:
             raise ModelConfigFileErrorInvalidOption(valid_options, options)
-
-
-if __name__ == "__main__":
-    config = read("modelconfig.ini")
-    print(config.sections())
