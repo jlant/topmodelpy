@@ -5,6 +5,7 @@ import os
 import numpy as np
 import pandas as pd
 import pytest
+from pathlib import Path
 
 
 @pytest.fixture(scope="module")
@@ -95,17 +96,17 @@ def parameters_wolock():
 
 
 @pytest.fixture(scope="module")
-def model_config_obj():
+def modelconfig_obj():
     config = ConfigParser(interpolation=ExtendedInterpolation())
     config["Inputs"] = {
-        "input_dir": "./inputs",
+        "input_dir": Path.cwd(),
         "parameters_file": "${Inputs:input_dir}/parameters.csv",
-        "climate_file": "${Inputs:input_dir}/climate.csv",
+        "timeseries_file": "${Inputs:input_dir}/timeseries.csv",
         "twi_file": "${Inputs:input_dir}/twi.csv",
     }
 
     config["Outputs"] = {
-        "output_dir": "./outputs",
+        "output_dir": Path.cwd(),
     }
 
     config["Options"] = {
@@ -118,24 +119,51 @@ def model_config_obj():
 
 
 @pytest.fixture(scope="module")
-def modelconfig_obj_bad_paths():
+def modelconfig_obj_no_sections():
+    return ConfigParser(interpolation=ExtendedInterpolation())
 
-    from configparser import ConfigParser, ExtendedInterpolation
 
+@pytest.fixture(scope="module")
+def modelconfig_obj_bad_options():
     config = ConfigParser(interpolation=ExtendedInterpolation())
-
     config["Inputs"] = {
-        "basin_chars_csv_file": __file__,
-        "input_dir": "/some/path/that/does/not/exist",
-        "pet_csv_file": "",
+        "input_dir": "./inputs",
+        "parameters_file": "/some/bad/path/parameters.csv",
+        "timeseries_file": "${Inputs:input_dir}/timeseries.csv",
+        "twi_file": "${Inputs:input_dir}/twi.csv",
     }
 
     config["Outputs"] = {
-        "output_dir": "/home/jlantl/jeremiah/projects/waterpy/data/outputs",
+        "output_dir": "./outputs",
     }
 
     config["Options"] = {
-        "pet_hamon": "yes",
+        "option_pet": "pet",
+        "option_snowmelt_with_precip": "snow",
+        "option_snowmelt_with_no_precip": "snow",
+    }
+
+    return config
+
+
+@pytest.fixture(scope="module")
+def modelconfig_obj_bad_paths():
+    config = ConfigParser(interpolation=ExtendedInterpolation())
+    config["Inputs"] = {
+        "input_dir": "./inputs",
+        "parameters_file": "/some/bad/path/parameters.csv",
+        "timeseries_file": "${Inputs:input_dir}/timeseries.csv",
+        "twi_file": "${Inputs:input_dir}/twi.csv",
+    }
+
+    config["Outputs"] = {
+        "output_dir": "./outputs",
+    }
+
+    config["Options"] = {
+        "option_pet": "hamon",
+        "option_snowmelt_with_precip": "heavily_forested",
+        "option_snowmelt_with_no_precip": "temperature_index",
     }
 
     return config

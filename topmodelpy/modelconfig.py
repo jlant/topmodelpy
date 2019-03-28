@@ -10,6 +10,8 @@ three sections:
 from configparser import ConfigParser, ExtendedInterpolation
 from pathlib import Path
 
+from .exceptions import InvalidModelConfigFileInvalidSections
+
 
 def read(filepath):
     """Read model config file.
@@ -37,6 +39,8 @@ def read(filepath):
         print(err)
     except ValueError as err:
         print(err)
+    except InvalidModelConfigFileInvalidSections as err:
+        print(err)
     except Exception as err:
         print(err)
 
@@ -58,19 +62,8 @@ def check_config_sections(config):
     """Check that the config file has sections."""
     valid_sections = ["Inputs", "Outputs", "Options"]
     sections = config.sections()
-    error_msg = (
-        """
-Error with model config file.
-Valid sections are:
-  [Inputs]
-  [Outputs]
-  [Options]
-Sections specified are:
-  {}
-        """.format(sections)
-    )
     if not sections == valid_sections:
-        raise ValueError(error_msg)
+        raise InvalidModelConfigFileInvalidSections(valid_sections, sections)
 
 
 def check_config_filepaths(config):
@@ -123,9 +116,3 @@ Options specified are:
         raise ValueError(error_msg)
     if option_snowmelt_with_no_precip not in valid_options_snowmelt_with_no_precip:
         raise ValueError(error_msg)
-
-
-if __name__ == "__main__":
-    modelconfig = read("modelconfig.ini")
-    print(modelconfig.sections())
-    print(modelconfig["Inputs"]["input_dir"])

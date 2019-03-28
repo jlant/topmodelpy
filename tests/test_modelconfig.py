@@ -1,48 +1,76 @@
-
-"""Tests for read_modelconfig module.
+"""Tests for modelconfig module.
 """
 
 import pytest
-import os
+from pathlib import Path, PurePath
 
+from topmodelpy.exceptions import InvalidModelConfigFileInvalidSections
 from topmodelpy import modelconfig
 
 
-def test_raises_exception_bad_file(modelconfig_obj_empty):
-
-    filepath = "some/filepath/bad_file.txt"
-    msg = ("Error with modelconfig file.")
-    with pytest.raises(ValueError) as err:
-        modelconfig.read(filepath)
-
-
 def test_modelconfig_obj(modelconfig_obj):
-
-    # Testing a sample of the file that have different value types, i.e. paths,
-    # None values, Boolean, etc.
     expected_sections = ["Inputs", "Outputs", "Options"]
-
-    expected_model_type = "topmodel_wolock"
-
-    expected_input_dir = "/home/jlantl/jeremiah/projects/waterpy/data/inputs"
-    expected_model_parameters_csv_file = os.path.join(expected_input_dir,
-                                                      "model_parameters.csv")
-    expected_pet_file = ""
-    expected_option_pet_hamon = "yes"
-    expected_option_pet_hamon_bool = True
+    expected_input_dir = Path.cwd()
+    expected_parameters_file = PurePath(expected_input_dir).joinpath(
+                                                    "parameters.csv")
+    expected_timeseries_file = PurePath(expected_input_dir).joinpath(
+                                                    "timeseries.csv")
+    expected_twi_file = PurePath(expected_input_dir).joinpath(
+                                                    "twi.csv")
+    expected_output_dir = Path.cwd()
+    expected_option_pet = "hamon"
+    expected_option_snowmelt_with_precip = "heavily_forested"
+    expected_option_snowmelt_with_no_precip = "temperature_index"
 
     actual_sections = modelconfig_obj.sections()
-    actual_model_type = model_config_obj["Inputs"]["model_type"]
-    actual_input_dir = model_config_obj["Inputs"]["input_dir"]
-    actual_model_parameters_csv_file = model_config_obj["Inputs"]["model_parameters_csv_file"]
-    actual_pet_file = model_config_obj["Inputs"]["pet_csv_file"]
-    actual_option_pet_hamon = model_config_obj["Options"]["option_pet_hamon"]
-    actual_option_pet_hamon_bool = model_config_obj["Options"].getboolean("option_pet_hamon")
+    actual_input_dir = modelconfig_obj["Inputs"]["input_dir"]
+    actual_parameters_file = modelconfig_obj["Inputs"]["parameters_file"]
+    actual_timeseries_file = modelconfig_obj["Inputs"]["timeseries_file"]
+    actual_twi_file = modelconfig_obj["Inputs"]["twi_file"]
+    actual_output_dir = modelconfig_obj["Outputs"]["output_dir"]
+    actual_option_pet = modelconfig_obj["Options"]["option_pet"]
+    actual_option_snowmelt_with_precip = modelconfig_obj["Options"][
+        "option_snowmelt_with_precip"]
+    actual_option_snowmelt_with_no_precip = modelconfig_obj["Options"][
+        "option_snowmelt_with_no_precip"]
 
     assert actual_sections == expected_sections
-    assert actual_model_type == expected_model_type
-    assert actual_input_dir == expected_input_dir
-    assert actual_model_parameters_csv_file == expected_model_parameters_csv_file
-    assert actual_pet_file == expected_pet_file
-    assert actual_option_pet_hamon == expected_option_pet_hamon
-    assert actual_option_pet_hamon_bool== expected_option_pet_hamon_bool
+    assert actual_input_dir == str(expected_input_dir)
+    assert actual_parameters_file == str(expected_parameters_file)
+    assert actual_timeseries_file == str(expected_timeseries_file)
+    assert actual_twi_file == str(expected_twi_file)
+    assert actual_output_dir == str(expected_output_dir)
+    assert actual_option_pet == expected_option_pet
+    assert actual_option_snowmelt_with_precip == expected_option_snowmelt_with_precip
+    assert actual_option_snowmelt_with_no_precip == expected_option_snowmelt_with_no_precip
+
+
+def test_modelconfig_obj_no_sections(modelconfig_obj_no_sections):
+    with pytest.raises(InvalidModelConfigFileInvalidSections) as err:
+        modelconfig.check_config_sections(modelconfig_obj_no_sections)
+
+    #sections = modelconfig_obj_no_sections.sections()
+    #assert str(err.value) == error_msg
+
+
+def test_modelconfig_obj_bad_options(modelconfig_obj_bad_options):
+    with pytest.raises(ValueError) as err:
+        modelconfig.check_config_options(modelconfig_obj_bad_options)
+
+    msg = (
+        """
+Error with model config file.
+Valid options are:
+  option_pet = hamon
+  option_snowmelt_with_precip = heavily_forested or
+                                partly_forested
+  option_snowmelt_with_no_precip = temperature_index
+Options specified are:
+  option_pet = pet
+  option_snowmelt_with_precip = snow
+  option_snowmelt_with_no_precip = snow
+        """
+    )
+    assert str(err.value) == msg
+
+
