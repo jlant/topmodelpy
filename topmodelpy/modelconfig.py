@@ -37,10 +37,6 @@ def read(filepath):
         config = ConfigParser(interpolation=ExtendedInterpolation())
         config.read(filepath)
         check_config(config)
-    except IOError as err:
-        print(err)
-    except ValueError as err:
-        print(err)
     except ModelConfigFileErrorInvalidSection as err:
         print(err)
     except ModelConfigFileErrorInvalidFilePath as err:
