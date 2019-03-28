@@ -8,18 +8,58 @@ class TopmodelpyException(Exception):
     """
 
 
-class InvalidModelConfigFileInvalidSections(TopmodelpyException):
+class ModelConfigFileErrorInvalidSection(TopmodelpyException):
     """
-    Raised when a file is not a properly formatted configuration ini file.
+    Raised when a model config file does not contain required sections.
     """
     def __init__(self, valid_sections, invalid_sections):
         self.message = (
             "Error with model config file.\n"
-            "Invalid sections.\n"
+            "Invalid section.\n"
             "Valid sections are:\n"
             "  {}\n"
             "Invalid sections specified are:\n"
             "  {}".format(valid_sections, invalid_sections)
+        )
+
+    def __str__(self):
+        return self.message
+
+
+class ModelConfigFileErrorInvalidFilePath(TopmodelpyException):
+    """
+    Raised when a model config file does not contain required sections.
+    """
+    def __init__(self, filepath):
+        self.message = (
+            "Error with model config file.\n"
+            "Invalid file path: {}".format(filepath)
+        )
+
+    def __str__(self):
+        return self.message
+
+
+class ModelConfigFileErrorInvalidOption(TopmodelpyException):
+    """
+    Raised when a model config file does not contain valid options.
+    """
+    def __init__(self, valid_options, options):
+        self.message = (
+            "Error with model config file.\n"
+            "Invalid option.\n"
+            "Valid options are contained in each respective list:\n"
+            "  option_pet = {pet}\n"
+            "  option_snowmelt_with_precip = {snowmelt_with_precip}\n"
+            "  option_snowmelt_with_no_precip = {snowmelt_with_no_precip}\n"
+            "".format(**valid_options)
+        )
+        self.message = self.message + (
+            "Options specified are:\n"
+            "  option_pet = {pet}\n"
+            "  option_snowmelt_with_precip = {snowmelt_with_precip}\n"
+            "  option_snowmelt_with_no_precip = {snowmelt_with_no_precip}\n"
+            "".format(**options)
         )
 
     def __str__(self):

@@ -10,7 +10,9 @@ three sections:
 from configparser import ConfigParser, ExtendedInterpolation
 from pathlib import Path
 
-from .exceptions import InvalidModelConfigFileInvalidSections
+from .exceptions import (ModelConfigFileErrorInvalidSection,
+                         ModelConfigFileErrorInvalidFilePath,
+                         ModelConfigFileErrorInvalidOption)
 
 
 def read(filepath):
@@ -39,7 +41,11 @@ def read(filepath):
         print(err)
     except ValueError as err:
         print(err)
-    except InvalidModelConfigFileInvalidSections as err:
+    except ModelConfigFileErrorInvalidSection as err:
+        print(err)
+    except ModelConfigFileErrorInvalidFilePath as err:
+        print(err)
+    except ModelConfigFileErrorInvalidOption as err:
         print(err)
     except Exception as err:
         print(err)
@@ -63,7 +69,7 @@ def check_config_sections(config):
     valid_sections = ["Inputs", "Outputs", "Options"]
     sections = config.sections()
     if not sections == valid_sections:
-        raise InvalidModelConfigFileInvalidSections(valid_sections, sections)
+        raise ModelConfigFileErrorInvalidSection(valid_sections, sections)
 
 
 def check_config_filepaths(config):
@@ -74,9 +80,7 @@ def check_config_filepaths(config):
             if value and (key.endswith("dir") or key.endswith("file")):
                 filepath = Path(value)
                 if not filepath.exists() and not filepath.is_file():
-                    error_msg = ("Error with model config file.\n"
-                                 "Invalid file path: {}".format(value))
-                    raise IOError(error_msg)
+                    raise ModelConfigFileErrorInvalidFilePath(value)
 
 
 def check_config_options(config):
@@ -85,34 +89,27 @@ def check_config_options(config):
     valid_options_snowmelt_with_precip = ["heavily_forested",
                                           "partly_forested"]
     valid_options_snowmelt_with_no_precip = ["temperature_index"]
+    valid_options = {
+        "pet": ["hamon"],
+        "snowmelt_with_precip": ["heavily_forested", "partly_forested"],
+        "snowmelt_with_no_precip": ["temperature_index"],
+    }
 
-    option_pet = (
-        config["Options"]["option_pet"].lower().strip())
-    option_snowmelt_with_precip = (
-        config["Options"]["option_snowmelt_with_precip"].lower().strip())
-    option_snowmelt_with_no_precip = (
-        config["Options"]["option_snowmelt_with_no_precip"].lower().strip())
+    options = {
+        "pet": config["Options"]["option_pet"].lower().strip(),
+        "snowmelt_with_precip": (
+            config["Options"]["option_snowmelt_with_precip"].lower().strip()
+        ),
+        "snowmelt_with_no_precip": (
+            config["Options"]["option_snowmelt_with_no_precip"].lower().strip()
+        ),
+    }
 
-    error_msg = (
-        """
-Error with model config file.
-Valid options are:
-  option_pet = hamon
-  option_snowmelt_with_precip = heavily_forested or
-                                partly_forested
-  option_snowmelt_with_no_precip = temperature_index
-Options specified are:
-  option_pet = {}
-  option_snowmelt_with_precip = {}
-  option_snowmelt_with_no_precip = {}
-        """.format(option_pet,
-                   option_snowmelt_with_precip,
-                   option_snowmelt_with_no_precip)
-    )
+    for key in valid_options.keys() and options.keys():
+        if options[key] not in valid_options[key]:
+            raise ModelConfigFileErrorInvalidOption(valid_options, options)
 
-    if option_pet not in valid_options_pet:
-        raise ValueError(error_msg)
-    if option_snowmelt_with_precip not in valid_options_snowmelt_with_precip:
-        raise ValueError(error_msg)
-    if option_snowmelt_with_no_precip not in valid_options_snowmelt_with_no_precip:
-        raise ValueError(error_msg)
+
+if __name__ == "__main__":
+    config = read("modelconfig.ini")
+    print(config.sections())

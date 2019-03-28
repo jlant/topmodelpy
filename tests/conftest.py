@@ -119,51 +119,51 @@ def modelconfig_obj():
 
 
 @pytest.fixture(scope="module")
-def modelconfig_obj_no_sections():
+def modelconfig_obj_invalid_sections():
     return ConfigParser(interpolation=ExtendedInterpolation())
 
 
 @pytest.fixture(scope="module")
-def modelconfig_obj_bad_options():
+def modelconfig_obj_invalid_filepath():
     config = ConfigParser(interpolation=ExtendedInterpolation())
     config["Inputs"] = {
-        "input_dir": "./inputs",
-        "parameters_file": "/some/bad/path/parameters.csv",
+        "input_dir": Path.cwd(),
+        "parameters_file": "some/bad/filepath/",
         "timeseries_file": "${Inputs:input_dir}/timeseries.csv",
         "twi_file": "${Inputs:input_dir}/twi.csv",
     }
 
     config["Outputs"] = {
-        "output_dir": "./outputs",
-    }
-
-    config["Options"] = {
-        "option_pet": "pet",
-        "option_snowmelt_with_precip": "snow",
-        "option_snowmelt_with_no_precip": "snow",
-    }
-
-    return config
-
-
-@pytest.fixture(scope="module")
-def modelconfig_obj_bad_paths():
-    config = ConfigParser(interpolation=ExtendedInterpolation())
-    config["Inputs"] = {
-        "input_dir": "./inputs",
-        "parameters_file": "/some/bad/path/parameters.csv",
-        "timeseries_file": "${Inputs:input_dir}/timeseries.csv",
-        "twi_file": "${Inputs:input_dir}/twi.csv",
-    }
-
-    config["Outputs"] = {
-        "output_dir": "./outputs",
+        "output_dir": "",
     }
 
     config["Options"] = {
         "option_pet": "hamon",
         "option_snowmelt_with_precip": "heavily_forested",
         "option_snowmelt_with_no_precip": "temperature_index",
+    }
+
+    return config
+
+
+@pytest.fixture(scope="module")
+def modelconfig_obj_invalid_options():
+    config = ConfigParser(interpolation=ExtendedInterpolation())
+    config["Inputs"] = {
+        "input_dir": Path.cwd(),
+        "parameters_file": "${Inputs:input_dir}/parameters.csv",
+        "timeseries_file": "${Inputs:input_dir}/timeseries.csv",
+        "twi_file": "${Inputs:input_dir}/twi.csv",
+    }
+
+    config["Outputs"] = {
+        "output_dir": Path.cwd(),
+    }
+
+    config["Options"] = {
+        "option_pet": "yes",
+        "option_snowmelt_with_precip": "snow",
+        "option_snowmelt_with_no_precip": "hello",
     }
 
     return config

@@ -4,7 +4,9 @@
 import pytest
 from pathlib import Path, PurePath
 
-from topmodelpy.exceptions import InvalidModelConfigFileInvalidSections
+from topmodelpy.exceptions import (ModelConfigFileErrorInvalidSection,
+                                   ModelConfigFileErrorInvalidFilePath,
+                                   ModelConfigFileErrorInvalidOption)
 from topmodelpy import modelconfig
 
 
@@ -45,32 +47,22 @@ def test_modelconfig_obj(modelconfig_obj):
     assert actual_option_snowmelt_with_no_precip == expected_option_snowmelt_with_no_precip
 
 
-def test_modelconfig_obj_no_sections(modelconfig_obj_no_sections):
-    with pytest.raises(InvalidModelConfigFileInvalidSections) as err:
-        modelconfig.check_config_sections(modelconfig_obj_no_sections)
+def test_modelconfig_obj_no_sections(modelconfig_obj_invalid_sections):
+    with pytest.raises(ModelConfigFileErrorInvalidSection) as err:
+        modelconfig.check_config_sections(modelconfig_obj_invalid_sections)
 
-    #sections = modelconfig_obj_no_sections.sections()
-    #assert str(err.value) == error_msg
-
-
-def test_modelconfig_obj_bad_options(modelconfig_obj_bad_options):
-    with pytest.raises(ValueError) as err:
-        modelconfig.check_config_options(modelconfig_obj_bad_options)
-
-    msg = (
-        """
-Error with model config file.
-Valid options are:
-  option_pet = hamon
-  option_snowmelt_with_precip = heavily_forested or
-                                partly_forested
-  option_snowmelt_with_no_precip = temperature_index
-Options specified are:
-  option_pet = pet
-  option_snowmelt_with_precip = snow
-  option_snowmelt_with_no_precip = snow
-        """
-    )
-    assert str(err.value) == msg
+    assert "Invalid section" in str(err.value)
 
 
+def test_modelconfig_obj_invalid_filepath(modelconfig_obj_invalid_filepath):
+    with pytest.raises(ModelConfigFileErrorInvalidFilePath) as err:
+        modelconfig.check_config_filepaths(modelconfig_obj_invalid_filepath)
+
+    assert "Invalid file path" in str(err.value)
+
+
+def test_modelconfig_obj_invalid_options(modelconfig_obj_invalid_options):
+    with pytest.raises(ModelConfigFileErrorInvalidOption) as err:
+        modelconfig.check_config_options(modelconfig_obj_invalid_options)
+
+    assert "Invalid option" in str(err.value)
