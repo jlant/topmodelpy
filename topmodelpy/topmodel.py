@@ -26,7 +26,6 @@ class Topmodel:
     """Class that represents a Topmodel based rainfall-runoff model
     implementation by David Wolock.
     """
-
     def __init__(self,
                  scaling_parameter,
                  saturated_hydraulic_conductivity,

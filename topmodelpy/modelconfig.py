@@ -65,7 +65,7 @@ def check_config_sections(config):
     valid_sections = ["Inputs", "Outputs", "Options"]
     sections = config.sections()
     if not sections == valid_sections:
-        raise ModelConfigFileErrorInvalidSection(valid_sections, sections)
+        raise ModelConfigFileErrorInvalidSection(sections, valid_sections)
 
 
 def check_config_filepaths(config):
@@ -99,4 +99,4 @@ def check_config_options(config):
 
     for key in valid_options.keys() and options.keys():
         if options[key] not in valid_options[key]:
-            raise ModelConfigFileErrorInvalidOption(valid_options, options)
+            raise ModelConfigFileErrorInvalidOption(options, valid_options)

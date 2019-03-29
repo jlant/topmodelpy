@@ -167,3 +167,45 @@ def modelconfig_obj_invalid_options():
     }
 
     return config
+
+
+@pytest.fixture(scope="module")
+def parameters_file():
+    return ("""name,value,units,description
+scaling_parameter,10,millimeters,a description
+saturated_hydraulic_conductivity,150,millimeters/day,a description
+macropore_fraction,0.2,fraction,a description
+soil_depth_total,1,meters,a description
+soil_depth_ab_horizon,0.7,meters,a description
+field_capacity_fraction,0.2,fraction,a description
+latitude,40.5,degrees,a description
+basin_area_total,3.5,square kilometers,a description
+impervious_area_fraction,0.3,fraction,a description
+snowmelt_temperature_cutoff,-32,degrees fahrenheit,a description
+snowmelt_rate_coeff,0.06,1/degrees fahrenheit,a description
+snowmelt_rate_with_rain_coeff,7E-3,inches per degree fahrenheit,a description
+channel_length_max,5,kilometers,a description
+channel_velocity_avg,19,kilometers/day,a description
+flow_initial,1,millimeters/day,a description
+""")
+
+
+@pytest.fixture(scope="module")
+def parameters_file_invalid_header():
+    return ("""names,val,unit,descr
+scaling_parameter,10,millimeters,a description
+saturated_hydraulic_conductivity,150,millimeters/day,a description
+macropore_fraction,0.2,fraction,a description
+soil_depth_total,1,meters,a description
+soil_depth_ab_horizon,0.7,meters,a description
+field_capacity_fraction,0.2,fraction,a description
+latitude,40.5,degrees,a description
+basin_area_total,3.5,square kilometers,a description
+impervious_area_fraction,0.3,fraction,a description
+snowmelt_temperature_cutoff,-32,degrees fahrenheit,a description
+snowmelt_rate_coeff,0.06,1/degrees fahrenheit,a description
+snowmelt_rate_with_rain_coeff,7E-3,inches per degree fahrenheit,a description
+channel_length_max,5,kilometers,a description
+channel_velocity_avg,19,kilometers/day,a description
+flow_initial,1,millimeters/day,a description
+""")
