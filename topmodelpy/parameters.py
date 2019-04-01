@@ -17,7 +17,7 @@ from .exceptions import (ParametersFileErrorInvalidHeader,
 
 
 def read(filepath):
-    """Read and open data file
+    """Read data file
     Open file and create a file object to process with
     read_file_in(filestream).
 
