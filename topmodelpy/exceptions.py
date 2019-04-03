@@ -27,7 +27,7 @@ class ModelConfigFileErrorInvalidSection(TopmodelpyException):
 
 class ModelConfigFileErrorInvalidFilePath(TopmodelpyException):
     """
-    Raised when a model config file does not contain required sections.
+    Raised when a model config file does not contain vaild file paths.
     """
     def __init__(self, filepath):
         self.message = (
