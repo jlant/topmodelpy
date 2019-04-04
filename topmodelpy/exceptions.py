@@ -6,6 +6,8 @@ class TopmodelpyException(Exception):
     """
     Base exception class.  All custom exceptions subclass this class.
     """
+    def __str__(self):
+        return self.message
 
 
 class ModelConfigFileErrorInvalidSection(TopmodelpyException):
@@ -21,9 +23,6 @@ class ModelConfigFileErrorInvalidSection(TopmodelpyException):
             "  {}\n".format(invalid_sections, valid_sections)
         )
 
-    def __str__(self):
-        return self.message
-
 
 class ModelConfigFileErrorInvalidFilePath(TopmodelpyException):
     """
@@ -35,9 +34,6 @@ class ModelConfigFileErrorInvalidFilePath(TopmodelpyException):
             "Invalid file path:\n"
             "  {}".format(filepath)
         )
-
-    def __str__(self):
-        return self.message
 
 
 class ModelConfigFileErrorInvalidOption(TopmodelpyException):
@@ -61,9 +57,6 @@ class ModelConfigFileErrorInvalidOption(TopmodelpyException):
             "".format(**valid_options)
         )
 
-    def __str__(self):
-        return self.message
-
 
 class ParametersFileErrorInvalidHeader(TopmodelpyException):
     """
@@ -78,9 +71,6 @@ class ParametersFileErrorInvalidHeader(TopmodelpyException):
             "  {}\n"
             "".format(invalid_header, valid_header)
         )
-
-    def __str__(self):
-        return self.message
 
 
 class ParametersFileErrorInvalidScalingParameter(TopmodelpyException):
@@ -97,9 +87,6 @@ class ParametersFileErrorInvalidScalingParameter(TopmodelpyException):
             "".format(invalid_value)
         )
 
-    def __str__(self):
-        return self.message
-
 
 class ParametersFileErrorInvalidLatitude(TopmodelpyException):
     """
@@ -115,9 +102,6 @@ class ParametersFileErrorInvalidLatitude(TopmodelpyException):
             "".format(invalid_value)
         )
 
-    def __str__(self):
-        return self.message
-
 
 class ParametersFileErrorInvalidSoilDepthTotal(TopmodelpyException):
     """
@@ -132,9 +116,6 @@ class ParametersFileErrorInvalidSoilDepthTotal(TopmodelpyException):
             "  soil_depth_total > 0\n"
             "".format(invalid_value)
         )
-
-    def __str__(self):
-        return self.message
 
 
 class ParametersFileErrorInvalidSoilDepthAB(TopmodelpyException):
@@ -152,9 +133,6 @@ class ParametersFileErrorInvalidSoilDepthAB(TopmodelpyException):
             "".format(invalid_value, soil_depth_total)
         )
 
-    def __str__(self):
-        return self.message
-
 
 class ParametersFileErrorInvalidFieldCapacity(TopmodelpyException):
     """
@@ -169,9 +147,6 @@ class ParametersFileErrorInvalidFieldCapacity(TopmodelpyException):
             "  0 <= field_capacity_fraction <=1\n"
             "".format(invalid_value)
         )
-
-    def __str__(self):
-        return self.message
 
 
 class ParametersFileErrorInvalidMacropore(TopmodelpyException):
@@ -188,9 +163,6 @@ class ParametersFileErrorInvalidMacropore(TopmodelpyException):
             "".format(invalid_value)
         )
 
-    def __str__(self):
-        return self.message
-
 
 class ParametersFileErrorInvalidImperviousArea(TopmodelpyException):
     """
@@ -206,24 +178,17 @@ class ParametersFileErrorInvalidImperviousArea(TopmodelpyException):
             "".format(invalid_value)
         )
 
-    def __str__(self):
-        return self.message
 
-
-class InvalidUsgsNwisTsvFile(TopmodelpyException):
-    """
-    Raised when a file is not a properly formatted USGS NWIS tsv file.
-    """
-
-
-class InvalidTimeseriesCsvFile(TopmodelpyException):
+class TimeseriesFileErrorInvalidHeader(TopmodelpyException):
     """
     Raised when a file is not a properly formatted timeseries csv file.
     """
-
-
-class InvalidTwiCsvFile(TopmodelpyException):
-    """
-    Raised when a file is not a properly formatted twi disribution csv file.
-    """
-
+    def __init__(self, invalid_header, valid_header):
+        self.message = (
+            "Error with timeseries file.\n"
+            "Invalid header:\n"
+            "  {}\n"
+            "Valid header:\n"
+            "  {}\n"
+            "".format(invalid_header, valid_header)
+        )

@@ -1,0 +1,6 @@
+date,precipitation (mm/day),pet (mm/day),flow observed (mm/day),temperature (celsius)
+2019-01-01,1.5,1,6,0.56
+2019-01-02,0.25,2,7,0
+2019-01-03,0,3,8,-1.11
+2019-01-04,0.1,4,9,1.67
+2019-01-05,0.05,5,10,2.22

@@ -1,5 +1,4 @@
-"""Tests for modelconfig module.
-"""
+"""Tests for modelconfigfile module."""
 
 import pytest
 from pathlib import Path, PurePath
@@ -7,7 +6,7 @@ from pathlib import Path, PurePath
 from topmodelpy.exceptions import (ModelConfigFileErrorInvalidSection,
                                    ModelConfigFileErrorInvalidFilePath,
                                    ModelConfigFileErrorInvalidOption)
-from topmodelpy import modelconfig
+from topmodelpy import modelconfigfile
 
 
 def test_modelconfig_obj(modelconfig_obj):
@@ -49,20 +48,20 @@ def test_modelconfig_obj(modelconfig_obj):
 
 def test_modelconfig_obj_no_sections(modelconfig_obj_invalid_sections):
     with pytest.raises(ModelConfigFileErrorInvalidSection) as err:
-        modelconfig.check_config_sections(modelconfig_obj_invalid_sections)
+        modelconfigfile.check_config_sections(modelconfig_obj_invalid_sections)
 
     assert "Invalid section" in str(err.value)
 
 
 def test_modelconfig_obj_invalid_filepath(modelconfig_obj_invalid_filepath):
     with pytest.raises(ModelConfigFileErrorInvalidFilePath) as err:
-        modelconfig.check_config_filepaths(modelconfig_obj_invalid_filepath)
+        modelconfigfile.check_config_filepaths(modelconfig_obj_invalid_filepath)
 
     assert "Invalid file path" in str(err.value)
 
 
 def test_modelconfig_obj_invalid_options(modelconfig_obj_invalid_options):
     with pytest.raises(ModelConfigFileErrorInvalidOption) as err:
-        modelconfig.check_config_options(modelconfig_obj_invalid_options)
+        modelconfigfile.check_config_options(modelconfig_obj_invalid_options)
 
     assert "Invalid option" in str(err.value)

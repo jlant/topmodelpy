@@ -1,8 +1,4 @@
-"""Module that contains functions to read a parameters file.
-
-A module that contains functionality that reads a comma-delimited parameter
-file.
-"""
+"""Module that contains functions to read a parameters file in csv format."""
 
 import csv
 
@@ -21,13 +17,13 @@ def read(filepath):
     Open file and create a file object to process with
     read_file_in(filestream).
 
-    :param filepath: File path to data file.
+    :param filepath: File path of data file.
     :type param: string
     :return data: A dict that contains all the data from the file.
     :rtype: dict
     """
     try:
-        with open(filepath, "r") as f:
+        with open(filepath) as f:
             data = read_in(f)
         check_data(data)
         return data

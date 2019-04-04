@@ -209,3 +209,25 @@ channel_length_max,5,kilometers,a description
 channel_velocity_avg,19,kilometers/day,a description
 flow_initial,1,millimeters/day,a description
 """)
+
+
+@pytest.fixture(scope="module")
+def timeseries_file():
+    return ("""date,temperature (celsius),precipitation (mm/day),pet (mm/day),flow observed (mm/day)
+2019-01-01,1.0,2.0,3.0,4.0
+2019-01-02,1.1,2.1,3.1,4.1
+2019-01-03,1.2,2.2,3.2,4.2
+2019-01-04,1.3,2.3,3.3,4.3
+2019-01-05,1.4,2.4,3.4,4.4
+""")
+
+
+@pytest.fixture(scope="module")
+def timeseries_file_invalid_header():
+    return ("""date,temperature (fahrenheit),precipitation (mm/day),pet (mm/day),flow observed (mm/day)
+2019-01-01,1.0,2.0,3.0,4.0
+2019-01-02,1.1,2.1,3.1,4.1
+2019-01-03,1.2,2.2,3.2,4.2
+2019-01-04,1.3,2.3,3.3,4.3
+2019-01-05,1.4,2.4,3.4,4.4
+""")
