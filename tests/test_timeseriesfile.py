@@ -6,7 +6,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from topmodelpy.exceptions import TimeseriesFileErrorInvalidHeader
+from topmodelpy.exceptions import (TimeseriesFileErrorInvalidHeader,
+                                   TimeseriesFileErrorMissingValues,
+                                   TimeseriesFileErrorMissingDates)
 from topmodelpy import timeseriesfile
 
 
@@ -45,3 +47,23 @@ def test_timeseries_file_invalid_header(timeseries_file_invalid_header):
         timeseriesfile.read_in(filestream)
 
     assert "Invalid header" in str(err.value)
+
+
+def test_timeseries_file_missing_dates(timeseries_file_missing_dates):
+    filestream = StringIO(timeseries_file_missing_dates)
+
+    with pytest.raises(TimeseriesFileErrorMissingDates) as err:
+        timeseriesfile.read_in(filestream)
+
+    print(err.value)
+    assert "Missing dates" in str(err.value)
+
+
+def test_timeseries_file_missing_values(timeseries_file_missing_values):
+    filestream = StringIO(timeseries_file_missing_values)
+
+    with pytest.raises(TimeseriesFileErrorMissingValues) as err:
+        timeseriesfile.read_in(filestream)
+
+    print(err.value)
+    assert "Missing values" in str(err.value)

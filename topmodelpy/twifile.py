@@ -1,11 +1,11 @@
-"""Module that contains functions to read a timeseries file in csv format."""
+"""Module that contains functions to read a twi file in csv format."""
 
 import numpy as np
 import pandas as pd
 
-from .exceptions import (TimeseriesFileErrorInvalidHeader,
-                         TimeseriesFileErrorMissingDates,
-                         TimeseriesFileErrorMissingValues)
+from .exceptions import (TwiFileErrorInvalidHeader,
+                         TwiFileErrorMissingValues,
+                         TwiFileErrorInvalidProportion)
 
 
 def read(filepath):
@@ -22,11 +22,11 @@ def read(filepath):
         with open(filepath, "r") as f:
             data = read_in(f)
         return data
-    except TimeseriesFileErrorInvalidHeader as err:
+    except TwiFileErrorInvalidHeader as err:
         print(err)
-    except TimeseriesFileErrorMissingDates as err:
+    except TwiFileErrorMissingValues as err:
         print(err)
-    except TimeseriesFileErrorMissingValues as err:
+    except TwiFileErrorInvalidProportion as err:
         print(err)
     except Exception as err:
         print(err)
@@ -43,19 +43,19 @@ def read_in(filestream):
     :return data: A dict that contains all the data from the file.
     :rtype: dict
     """
-    column_short_names = {
-        "temperature (celsius)": "temperature",
-        "precipitation (mm/day)": "precipitation",
-        "pet (mm/day)": "pet",
-        "flow observed (mm/day)": "flow_observed",
+    column_names = {
+        "bin": "bin",
+        "twi": "twi",
+        "proportion": "proportion",
+        "cells": "cells",
     }
 
-    data = pd.read_csv(filestream, index_col=0, parse_dates=True, dtype=float)
+    data = pd.read_csv(filestream, dtype=float)
     data.columns = data.columns.str.strip()
-    check_header(data.columns.values.tolist(), list(column_short_names))
-    check_missing_dates(data)
+    check_header(data.columns.values.tolist(), list(column_names))
     check_missing_values(data)
-    data.rename(columns=column_short_names, inplace=True)
+    check_proportion(data)
+    data.rename(columns=column_names, inplace=True)
 
     return data
 
@@ -70,19 +70,7 @@ def check_header(header, valid_header):
     """
     for item in header:
         if item not in valid_header:
-            raise TimeseriesFileErrorInvalidHeader(header, valid_header)
-
-
-def check_missing_dates(data):
-    """Check if any dates are missing.
-
-    :param data: Pandas DataFrame containing data.
-    :type data: pandas.DataFrame
-    """
-    if data.index.isna().any():
-        missing_indices = np.where(data.index.isna())[0]
-        timestamps_near_missing = data.index[missing_indices - 1]
-        raise TimeseriesFileErrorMissingDates(timestamps_near_missing.values)
+            raise TwiFileErrorInvalidHeader(header, valid_header)
 
 
 def check_missing_values(data):
@@ -91,6 +79,17 @@ def check_missing_values(data):
     :param data: Pandas DataFrame containing data.
     :type data: pandas.DataFrame
     """
-    if data.isna().values.any():
+    if data.isnull().values.any():
         missing_values = data[data.isna().any(axis=1)]
-        raise TimeseriesFileErrorMissingValues(missing_values)
+        raise TwiFileErrorMissingValues(missing_values)
+
+
+def check_proportion(data):
+    """Check that the sum of proportion column is close to 1.0.
+    rtol=1e-02 means that computed sum should be within 1% of 1.0
+
+    :param data: Pandas DataFrame containing data.
+    :type data: pandas.DataFrame
+    """
+    if not np.isclose(data["proportion"].sum(), 1.0, rtol=1e-02):
+        raise TwiFileErrorInvalidProportion(data["proportion"].sum())

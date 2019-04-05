@@ -231,3 +231,69 @@ def timeseries_file_invalid_header():
 2019-01-04,1.3,2.3,3.3,4.3
 2019-01-05,1.4,2.4,3.4,4.4
 """)
+
+
+@pytest.fixture(scope="module")
+def timeseries_file_missing_dates():
+    return ("""date,temperature (celsius),precipitation (mm/day),pet (mm/day),flow observed (mm/day)
+2019-01-01,1.0,2.0,3.0,4.0
+,1.1,2.1,3.1,4.1
+2019-01-03,1.2,2.2,3.2,4.2
+2019-01-04,1.3,2.3,3.3,4.3
+,1.4,2.4,3.4,4.4
+""")
+
+
+@pytest.fixture(scope="module")
+def timeseries_file_missing_values():
+    return ("""date,temperature (celsius),precipitation (mm/day),pet (mm/day),flow observed (mm/day)
+2019-01-01,1.0,2.0,3.0,
+2019-01-02,1.1,2.1,3.1,4.1
+2019-01-03,,2.2,3.2,4.2
+2019-01-04,1.3,2.3,3.3,4.3
+2019-01-05,1.4,2.4,3.4,4.4
+""")
+
+
+@pytest.fixture(scope="module")
+def twi_file():
+    return ("""bin,twi,proportion,cells
+1,0.02,0.10,10
+2,0.03,0.15,15
+3,0.04,0.25,25
+4,0.05,0.30,30
+5,0.06,0.20,20
+""")
+
+
+@pytest.fixture(scope="module")
+def twi_file_invalid_header():
+    return ("""bin,value,proportion,cells
+1,0.02,0.10,10
+2,0.03,0.15,15
+3,0.04,0.25,25
+4,0.05,0.30,30
+5,0.06,0.20,20
+""")
+
+
+@pytest.fixture(scope="module")
+def twi_file_missing_values():
+    return ("""bin,twi,proportion,cells
+1,0.02,0.10,
+2,0.03,0.15,15
+3,0.04,0.25,25
+4,0.05,0.30,30
+5,,0.20,20
+""")
+
+
+@pytest.fixture(scope="module")
+def twi_file_invalid_proportion():
+    return ("""bin,twi,proportion,cells
+1,0.02,0.10,10
+2,0.03,0.15,15
+3,0.04,0.25,25
+4,0.05,0.30,30
+5,0.06,0.22,20
+""")

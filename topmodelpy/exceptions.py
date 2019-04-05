@@ -192,3 +192,72 @@ class TimeseriesFileErrorInvalidHeader(TopmodelpyException):
             "  {}\n"
             "".format(invalid_header, valid_header)
         )
+
+
+class TimeseriesFileErrorMissingValues(TopmodelpyException):
+    """
+    Raised when a file is not a properly formatted timeseries csv file.
+    """
+    def __init__(self, missing_values):
+        self.message = (
+            "Error with timeseries file.\n"
+            "Missing values:\n"
+            "  {}\n"
+            "".format(missing_values)
+        )
+
+
+class TimeseriesFileErrorMissingDates(TopmodelpyException):
+    """
+    Raised when a file is not a properly formatted timeseries csv file.
+    """
+    def __init__(self, timestamps_near_missing):
+        self.message = (
+            "Error with timeseries file.\n"
+            "Missing dates near:\n"
+            "  {}\n"
+            "".format(timestamps_near_missing)
+        )
+
+
+class TwiFileErrorInvalidHeader(TopmodelpyException):
+    """
+    Raised when a file is not a properly formatted twi csv file.
+    """
+    def __init__(self, invalid_header, valid_header):
+        self.message = (
+            "Error with twi file.\n"
+            "Invalid header:\n"
+            "  {}\n"
+            "Valid header:\n"
+            "  {}\n"
+            "".format(invalid_header, valid_header)
+        )
+
+
+class TwiFileErrorMissingValues(TopmodelpyException):
+    """
+    Raised when a file is not a properly formatted twi csv file.
+    """
+    def __init__(self, missing_values):
+        self.message = (
+            "Error with twi file.\n"
+            "Missing values:\n"
+            "  {}\n"
+            "".format(missing_values)
+        )
+
+
+class TwiFileErrorInvalidProportion(TopmodelpyException):
+    """
+    Raised when a file is not a properly formatted twi csv file.
+    """
+    def __init__(self, invalid_proportion):
+        self.message = (
+            "Error with twi file.\n"
+            "Invalid sum of proportion column:\n"
+            "  {}\n"
+            "Valid sum of proportion column:\n"
+            "  1.0\n"
+            "".format(invalid_proportion)
+        )
