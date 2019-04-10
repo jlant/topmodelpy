@@ -256,6 +256,17 @@ def timeseries_file_missing_values():
 
 
 @pytest.fixture(scope="module")
+def timeseries_file_invalid_timestep():
+    return ("""date,temperature (celsius),precipitation (mm/day),pet (mm/day),flow observed (mm/day)
+2019-01-01,1.0,2.0,3.0,4.0
+2019-02-01,1.1,2.1,3.1,4.1
+2019-03-01,1,2.2,3.2,4.2
+2019-04-01,1.3,2.3,3.3,4.3
+2019-05-01,1.4,2.4,3.4,4.4
+""")
+
+
+@pytest.fixture(scope="module")
 def twi_file():
     return ("""bin,twi,proportion,cells
 1,0.02,0.10,10

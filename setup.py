@@ -18,7 +18,9 @@ with open("LICENSE") as license_file:
 
 
 requirements = [
-    # TODO: put package requirements here
+    "click",
+    "numpy",
+    "pandas",
 ]
 
 test_requirements = [
@@ -28,8 +30,9 @@ test_requirements = [
 
 setup(
     name="topmodelpy",
-    version="0.1.0",
-    description="is a command line interface for a rainfall-runoff model that predicts the amount of water flow in rivers.",
+    version="0.1",
+    description=("A rainfall-runoff model that predicts the amount "
+                 "of water flow in rivers."),
     long_description=readme + "\n\n" + changelog,
     author="Jeremiah Lant",
     author_email="jlant@usgs.gov",
@@ -37,8 +40,8 @@ setup(
     packages=[
         "topmodelpy",
     ],
-    package_dir={"topmodelpy":
-                 "topmodelpy"},
+    package_dir={"topmodelpy": "topmodelpy"},
+    entry_points={"console_scripts": ["topmodelpy = topmodelpy.cli:main"]},
     include_package_data=True,
     install_requires=requirements,
     license=license,
@@ -49,13 +52,11 @@ setup(
         "Intended Audience :: Developers",
         "License :: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication",
         "Natural Language :: English",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.6",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
     ],
     test_suite="tests",
     tests_require=test_requirements

@@ -8,7 +8,8 @@ import pytest
 
 from topmodelpy.exceptions import (TimeseriesFileErrorInvalidHeader,
                                    TimeseriesFileErrorMissingValues,
-                                   TimeseriesFileErrorMissingDates)
+                                   TimeseriesFileErrorMissingDates,
+                                   TimeseriesFileErrorInvalidTimestep)
 from topmodelpy import timeseriesfile
 
 
@@ -38,6 +39,7 @@ def test_timeseries_file_read_in(timeseries_file):
                                expected["flow_observed"])
     assert actual.dtypes.all() == "float64"
     assert isinstance(actual.index, pd.DatetimeIndex)
+    assert (actual.index[1] - actual.index[0]).days == 1
 
 
 def test_timeseries_file_invalid_header(timeseries_file_invalid_header):
@@ -55,7 +57,6 @@ def test_timeseries_file_missing_dates(timeseries_file_missing_dates):
     with pytest.raises(TimeseriesFileErrorMissingDates) as err:
         timeseriesfile.read_in(filestream)
 
-    print(err.value)
     assert "Missing dates" in str(err.value)
 
 
@@ -65,5 +66,14 @@ def test_timeseries_file_missing_values(timeseries_file_missing_values):
     with pytest.raises(TimeseriesFileErrorMissingValues) as err:
         timeseriesfile.read_in(filestream)
 
-    print(err.value)
     assert "Missing values" in str(err.value)
+
+
+def test_timeseries_file_invalid_timestep(timeseries_file_invalid_timestep):
+    filestream = StringIO(timeseries_file_invalid_timestep)
+
+    with pytest.raises(TimeseriesFileErrorInvalidTimestep) as err:
+        timeseriesfile.read_in(filestream)
+
+    print(err.value)
+    assert "Invalid timestep" in str(err.value)

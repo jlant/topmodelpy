@@ -220,6 +220,21 @@ class TimeseriesFileErrorMissingDates(TopmodelpyException):
         )
 
 
+class TimeseriesFileErrorInvalidTimestep(TopmodelpyException):
+    """
+    Raised when a file is not a properly formatted timeseries csv file.
+    """
+    def __init__(self, invalid_timestep):
+        self.message = (
+            "Error with timeseries file.\n"
+            "Invalid timestep:\n"
+            "  {}\n"
+            "Valid timestep:\n"
+            "  timestep <= 1 (sub-daily or daily)\n"
+            "".format(invalid_timestep)
+        )
+
+
 class TwiFileErrorInvalidHeader(TopmodelpyException):
     """
     Raised when a file is not a properly formatted twi csv file.

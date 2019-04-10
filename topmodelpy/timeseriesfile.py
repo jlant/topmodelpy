@@ -5,7 +5,8 @@ import pandas as pd
 
 from .exceptions import (TimeseriesFileErrorInvalidHeader,
                          TimeseriesFileErrorMissingDates,
-                         TimeseriesFileErrorMissingValues)
+                         TimeseriesFileErrorMissingValues,
+                         TimeseriesFileErrorInvalidTimestep)
 
 
 def read(filepath):
@@ -55,6 +56,7 @@ def read_in(filestream):
     check_header(data.columns.values.tolist(), list(column_short_names))
     check_missing_dates(data)
     check_missing_values(data)
+    check_timestep(data)
     data.rename(columns=column_short_names, inplace=True)
 
     return data
@@ -74,11 +76,7 @@ def check_header(header, valid_header):
 
 
 def check_missing_dates(data):
-    """Check if any dates are missing.
-
-    :param data: Pandas DataFrame containing data.
-    :type data: pandas.DataFrame
-    """
+    """Check for any missing dates."""
     if data.index.isna().any():
         missing_indices = np.where(data.index.isna())[0]
         timestamps_near_missing = data.index[missing_indices - 1]
@@ -86,11 +84,14 @@ def check_missing_dates(data):
 
 
 def check_missing_values(data):
-    """Check if any data is missing.
-
-    :param data: Pandas DataFrame containing data.
-    :type data: pandas.DataFrame
-    """
+    """Check for any missing data values."""
     if data.isna().values.any():
         missing_values = data[data.isna().any(axis=1)]
         raise TimeseriesFileErrorMissingValues(missing_values)
+
+
+def check_timestep(data):
+    """Check that the timestep is 1 day or less."""
+    timestep = (data.index[1] - data.index[0]).days
+    if not timestep <= 1:
+        raise TimeseriesFileErrorInvalidTimestep(timestep)
