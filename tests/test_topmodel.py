@@ -73,7 +73,7 @@ def test_topmodel_run(parameters_wolock,
         This version and Wolock's version produce predicted flow values are
         are close (max difference is 0.047 or 4.7%). However, there are small
         differences likely due to a slightly different twi mean values and
-        floating point differences from rounding.  This test allows for a 
+        floating point differences from rounding.  This test allows for a
         small relative tolerance (rtol) of 0.05 for assertions.
 
     Reference:
@@ -99,8 +99,8 @@ def test_topmodel_run(parameters_wolock,
         twi_mean=twi_weighted_mean_wolock,
         precip_available=timeseries_wolock["precip_minus_pet"].values,
         flow_initial=1,
-        soil_depth_roots=1,
-        timestep_daily_fraction=1
+        timestep_daily_fraction=1,
+        soil_depth_roots=1
     )
 
     topmodel.run()

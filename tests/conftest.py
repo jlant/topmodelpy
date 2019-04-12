@@ -86,7 +86,7 @@ def parameters_wolock():
         "impervious_area_fraction": 0.3,
         "snowmelt_temperature_cutoff": 32,
         "snowmelt_rate_coeff": 0.06,
-        "snowmelt_rate_with_rain_coeff": 0.007,
+        "snowmelt_rate_coeff_with_rain": 0.007,
         "channel_length_max": 1.98,
         "channel_velocity_avg": 10,
         "flow_initial": 1
@@ -183,7 +183,7 @@ basin_area_total,3.5,square kilometers,a description
 impervious_area_fraction,0.3,fraction,a description
 snowmelt_temperature_cutoff,-32,degrees fahrenheit,a description
 snowmelt_rate_coeff,0.06,1/degrees fahrenheit,a description
-snowmelt_rate_with_rain_coeff,7E-3,inches per degree fahrenheit,a description
+snowmelt_rate_coeff_with_rain,7E-3,inches per degree fahrenheit,a description
 channel_length_max,5,kilometers,a description
 channel_velocity_avg,19,kilometers/day,a description
 flow_initial,1,millimeters/day,a description
@@ -204,7 +204,7 @@ basin_area_total,3.5,square kilometers,a description
 impervious_area_fraction,0.3,fraction,a description
 snowmelt_temperature_cutoff,-32,degrees fahrenheit,a description
 snowmelt_rate_coeff,0.06,1/degrees fahrenheit,a description
-snowmelt_rate_with_rain_coeff,7E-3,inches per degree fahrenheit,a description
+snowmelt_rate_coeff_with_rain,7E-3,inches per degree fahrenheit,a description
 channel_length_max,5,kilometers,a description
 channel_velocity_avg,19,kilometers/day,a description
 flow_initial,1,millimeters/day,a description
@@ -213,7 +213,7 @@ flow_initial,1,millimeters/day,a description
 
 @pytest.fixture(scope="module")
 def timeseries_file():
-    return ("""date,temperature (celsius),precipitation (mm/day),pet (mm/day),flow observed (mm/day)
+    return ("""date,temperature (celsius),precipitation (mm/day),pet (mm/day),flow_observed (mm/day)
 2019-01-01,1.0,2.0,3.0,4.0
 2019-01-02,1.1,2.1,3.1,4.1
 2019-01-03,1.2,2.2,3.2,4.2
@@ -235,7 +235,7 @@ def timeseries_file_invalid_header():
 
 @pytest.fixture(scope="module")
 def timeseries_file_missing_dates():
-    return ("""date,temperature (celsius),precipitation (mm/day),pet (mm/day),flow observed (mm/day)
+    return ("""date,temperature (celsius),precipitation (mm/day),pet (mm/day),flow_observed (mm/day)
 2019-01-01,1.0,2.0,3.0,4.0
 ,1.1,2.1,3.1,4.1
 2019-01-03,1.2,2.2,3.2,4.2
@@ -246,7 +246,7 @@ def timeseries_file_missing_dates():
 
 @pytest.fixture(scope="module")
 def timeseries_file_missing_values():
-    return ("""date,temperature (celsius),precipitation (mm/day),pet (mm/day),flow observed (mm/day)
+    return ("""date,temperature (celsius),precipitation (mm/day),pet (mm/day),flow_observed (mm/day)
 2019-01-01,1.0,2.0,3.0,
 2019-01-02,1.1,2.1,3.1,4.1
 2019-01-03,,2.2,3.2,4.2
@@ -257,7 +257,7 @@ def timeseries_file_missing_values():
 
 @pytest.fixture(scope="module")
 def timeseries_file_invalid_timestep():
-    return ("""date,temperature (celsius),precipitation (mm/day),pet (mm/day),flow observed (mm/day)
+    return ("""date,temperature (celsius),precipitation (mm/day),pet (mm/day),flow_observed (mm/day)
 2019-01-01,1.0,2.0,3.0,4.0
 2019-02-01,1.1,2.1,3.1,4.1
 2019-03-01,1,2.2,3.2,4.2

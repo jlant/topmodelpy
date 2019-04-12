@@ -1,0 +1,16 @@
+name,value,units,description
+scaling_parameter,10,millimeters,controls the rate of decline of transmissivity in the soil profile
+saturated_hydraulic_conductivity,150,millimeters/day,saturated hydraulic conductivity of the C horizon of the soil
+macropore_fraction,0.2,fraction,fraction of precipitation that can bypass the unsaturated subsurface zone and move directly into the saturated subsurface zone
+soil_depth_total,1,mm,total soil depth - could be 90 cm for tile depth
+soil_depth_ab_horizon,0.5,mm,soil depth of AB horizon - 25% thickness
+field_capacity_fraction,0.2,fraction,fraction of soil moisture or water content in the soil after excess water has drained away
+latitude,40.5,degrees,mean latitude of basin
+basin_area_total,3.07,square kilometers,total basin area
+impervious_area_fraction,0.3,fraction,fraction of impervious area of basin
+snowmelt_temperature_cutoff,32,degrees fahrenheit,temperature cutoff for snowpack accumulation and snowmelt
+snowmelt_rate_coeff,0.06,1/degrees fahrenheit,used to control rate of snow melt
+snowmelt_rate_coeff_with_rain,0.007,inches per degree fahrenheit,used to control rate of snow melt when raining
+channel_length_max,1.98,kilometers,maximum channel length
+channel_velocity_avg,10,kilometers/day,average channel velocity
+flow_initial,1,millimeters/day,initial river flow

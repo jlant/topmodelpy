@@ -41,8 +41,8 @@ class Topmodel:
                  twi_mean,
                  precip_available,
                  flow_initial=1,
-                 soil_depth_roots=1,
-                 timestep_daily_fraction=1):
+                 timestep_daily_fraction=1,
+                 soil_depth_roots=1):
 
         # Check and assign timestep daily fraction
         if timestep_daily_fraction > 1:

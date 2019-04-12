@@ -15,7 +15,7 @@ import numpy as np
 def pet(dates, temperatures, latitude, method="hamon"):
     """Calculate potential evapotranspiration for various methods.
 
-    :param dates: An array of dates
+    :param dates: An array of python datetimes
     :type dates: numpy.ndarray
     :param temperatures: An array of temperatures , in degrees Celsius
     :type temperatures: numpy.ndarray
@@ -32,7 +32,7 @@ def pet_hamon(dates, temperatures, latitude):
     """Calculate the amount of potential evapotranspiration in millimeters
     per day using the Hamon equation.
 
-    :param dates: An array of dates
+    :param dates: An array of python datetimes
     :type dates: numpy.ndarray
     :param temps: An array of temps, in degrees Celsius
     :type temps: numpy.ndarray
@@ -115,7 +115,8 @@ def pet_hamon(dates, temperatures, latitude):
     pet = []
     for date, temperature in zip(dates, temperatures):
 
-        # calculate declination
+        # Declination
+        # Note: using python datetimes whih have .timetuple() method
         day_num = date.timetuple().tm_yday
         angle = 360 * ((284 + day_num) / 365) * DEG2RAD
         declination = (23.45 * DEG2RAD) * np.sin(angle)
@@ -156,8 +157,8 @@ def pet_hamon(dates, temperatures, latitude):
 def snowmelt(precipitation,
              temperatures,
              temperature_cutoff,
-             rain_melt_coeff,
-             melt_rate_coeff,
+             snowmelt_rate_coeff_with_rain,
+             snowmelt_rate_coeff,
              timestep_daily_fraction):
     """Snow melt routine.
 
@@ -168,15 +169,15 @@ def snowmelt(precipitation,
     :param temperature_cutoff: Temperature when melt begins,
                                in degrees Fahrenheit
     :type temperature_cutoff: float
-    :param rain_melt_coeff: Snowmelt coefficient when raining,
-                             1/degrees Fahrenheit
-    :type rain_melt_coeff: float
-    :param melt_rate_coeff: Snowmelt rate coefficient (often variable),
-                            in inches per degree Fahrenheit
-    :type melt_rate_coeff: float
+    :param snowmelt_rate_coeff_with_rain: Snowmelt coefficient when raining,
+                                          1/degrees Fahrenheit
+    :type snowmelt_rate_coeff_with_rain: float
+    :param snowmelt_rate_coeff: Snowmelt rate coefficient (often variable),
+                                in inches per degree Fahrenheit
+    :type snowmelt_rate_coeff: float
     :param timestep_daily_fraction: Model timestep as a fraction of a day
     :type timestep_daily_fraction: float
-    :return: Tuple of arrays of updated precipitation, snowmelt,
+    :return: Tuple of arrays of adjusted precipitation, snowmelt,
              and snowpack values, each array is in millimeters per day
     :rtype: Tuple
 
@@ -202,7 +203,7 @@ def snowmelt(precipitation,
                     precip_inch,
                     temp,
                     temperature_cutoff,
-                    rain_melt_coeff
+                    snowmelt_rate_coeff_with_rain
                 )
 
                 # adjust daily snowmelt to same timestep as precip and temp
@@ -212,7 +213,7 @@ def snowmelt(precipitation,
                 snowmelt = snowmelt_temperature_index(
                     temp,
                     temperature_cutoff,
-                    rain_melt_coeff
+                    snowmelt_rate_coeff
                 )
 
                 # adjust daily snowmelt to same timestep as precip and temp

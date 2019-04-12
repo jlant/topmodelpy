@@ -25,12 +25,6 @@ def read(filepath):
     :type filepath: string
     :return: A ConfigParser object that behaves much like a dictionary.
     :rtype: ConfigParser
-
-    Returns
-    -------
-    ConfigParser
-        A ConfigParser object that behaves much like a dictionary.
-
     """
     filepath = Path(filepath)
     try:

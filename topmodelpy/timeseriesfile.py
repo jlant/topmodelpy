@@ -16,8 +16,8 @@ def read(filepath):
 
     :param filepath: File path to data file.
     :type param: string
-    :return data: A dict that contains all the data from the file.
-    :rtype: dict
+    :return data: A dataframe of all the timeseries data.
+    :rtype: Pandas.DataFrame
     """
     try:
         with open(filepath, "r") as f:
@@ -48,7 +48,7 @@ def read_in(filestream):
         "temperature (celsius)": "temperature",
         "precipitation (mm/day)": "precipitation",
         "pet (mm/day)": "pet",
-        "flow observed (mm/day)": "flow_observed",
+        "flow_observed (mm/day)": "flow_observed",
     }
 
     data = pd.read_csv(filestream, index_col=0, parse_dates=True, dtype=float)

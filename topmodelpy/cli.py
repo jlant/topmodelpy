@@ -4,6 +4,8 @@
 import click
 import sys
 
+from topmodelpy.main import topmodelpy
+
 
 class Options:
     def __init__(self):
@@ -24,8 +26,6 @@ pass_options = click.make_pass_decorator(Options, ensure=True)
 def main(options, verbose, show):
     """Topmodelpy is a command line tool for a rainfall-runoff
     model that predicts the amount of water flow in rivers.
-
-    Specificiations for a model run are contained in a configuration file.
     """
     options.verbose = verbose
     options.show = show
@@ -35,9 +35,14 @@ def main(options, verbose, show):
 @click.argument("configfile", type=click.Path(exists=True))
 @pass_options
 def run(options, configfile):
+    """Run Topmodel with specifications from a model configuration file.
+
+    This command takes in the path to model configuration file.
+    """
     try:
-        click.echo("Run configfile")
-        click.echo(configfile)
+        click.echo("Running Topmodel")
+        click.echo("Model configuration file: {}".format(configfile))
+        topmodelpy(configfile, options)
     except Exception as err:
         click.echo(err)
         sys.exit(1)
