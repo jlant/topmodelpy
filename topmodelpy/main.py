@@ -37,7 +37,9 @@ def topmodelpy(configfile, options):
 
     preprocessed_data = preprocess(parameters, timeseries, twi)
     topmodel_data = run_topmodel(parameters, twi, preprocessed_data)
-    postprocess()
+    import pdb
+    pdb.set_trace()
+    postprocess(timeseries, preprocessed_data, topmodel_data)
 
 
 def read_input_files(configdata):
@@ -152,26 +154,52 @@ def run_topmodel(parameters, twi, preprocessed_data):
     """
     # Initialize Topmodel
     topmodel = Topmodel(
-        scaling_parameter=parameters["scaling_parameter"],
+        scaling_parameter=parameters["scaling_parameter"]["value"],
         saturated_hydraulic_conductivity=(
-            parameters["saturated_hydraulic_conductivity"]
+            parameters["saturated_hydraulic_conductivity"]["value"]
         ),
-        macropore_fraction=parameters["macropore_fraction"],
-        soil_depth_total=parameters["soil_depth_total"],
-        soil_depth_ab_horizon=parameters["soil_depth_ab_horizon"],
-        field_capacity_fraction=parameters["field_capacity_fraction"],
-        latitude=parameters["latitude"],
-        basin_area_total=parameters["basin_area_total"],
-        impervious_area_fraction=parameters["impervious_area_fraction"],
+        macropore_fraction=parameters["macropore_fraction"]["value"],
+        soil_depth_total=parameters["soil_depth_total"]["value"],
+        soil_depth_ab_horizon=parameters["soil_depth_ab_horizon"]["value"],
+        field_capacity_fraction=parameters["field_capacity_fraction"]["value"],
+        latitude=parameters["latitude"]["value"],
+        basin_area_total=parameters["basin_area_total"]["value"],
+        impervious_area_fraction=parameters["impervious_area_fraction"]["value"],
+        flow_initial=parameters["flow_initial"]["value"],
         twi_values=twi["twi"].to_numpy(),
         twi_saturated_areas=twi["proportion"].to_numpy(),
         twi_mean=preprocessed_data["twi_weighted_mean"],
         precip_available=preprocessed_data["precip_minus_pet"],
-        flow_initial=parameters["flow_initial"],
         timestep_daily_fraction=preprocessed_data["timestep_daily_fraction"]
     )
 
-    import pdb
-    pdb.set_trace()
     # Run Topmodel
     topmodel.run()
+
+    # Return a dict of relevant calculated values
+    topmodel_data = {
+        "flow_predicted": topmodel.flow_predicted,
+        "saturation_deficit_avgs": topmodel.saturation_deficit_avgs,
+        "saturation_deficit_locals": topmodel.saturation_deficit_locals,
+        "unsaturated_zone_storages": topmodel.unsaturated_zone_storages,
+        "root_zone_storages": topmodel.root_zone_storages,
+    }
+
+    return topmodel_data
+
+
+def postprocess(timeseries, preprocessed_data, topmodel_data):
+    """Postprocess data for output.
+
+    Output csv files
+    Plot timseries
+
+
+    """
+    # To add a new column to pandas dataframe:
+    # df.loc[:, "new_coln_name"] = array of values or a series or a list
+    # Create a copy of the timeseries dataframe and update with additional
+    # data
+    # Rename columns using df.rename(columns={"old": "new"})
+
+    pass

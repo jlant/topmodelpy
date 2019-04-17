@@ -132,7 +132,6 @@ class Topmodel:
         """Initialize model soil parameters, storage deficit, and
         unsaturated zone and root zone storages.
         """
-
         # Initialize soil parameters, channel routing parameters
         self._initialize_soil_hydraulic_parameters()
         self._initialize_channel_routing_parameters()

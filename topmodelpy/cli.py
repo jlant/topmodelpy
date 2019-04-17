@@ -35,8 +35,9 @@ def main(options, verbose, show):
 @click.argument("configfile", type=click.Path(exists=True))
 @pass_options
 def run(options, configfile):
-    """Run Topmodel with specifications from a model configuration file.
+    """Run Topmodel with a model configuration file.
 
+    The model configuration file contains the specifications for a model run.
     This command takes in the path to model configuration file.
     """
     try:
