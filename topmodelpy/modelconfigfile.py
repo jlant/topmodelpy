@@ -77,17 +77,13 @@ def check_config_options(config):
     """Check that all the options are valid."""
     valid_options = {
         "pet": ["hamon"],
-        "snowmelt_with_precip": ["heavily_forested", "partly_forested"],
-        "snowmelt_with_no_precip": ["temperature_index"],
+        "snowmelt": ["yes", "no"],
     }
 
     options = {
         "pet": config["Options"]["option_pet"].lower().strip(),
-        "snowmelt_with_precip": (
-            config["Options"]["option_snowmelt_with_precip"].lower().strip()
-        ),
-        "snowmelt_with_no_precip": (
-            config["Options"]["option_snowmelt_with_no_precip"].lower().strip()
+        "snowmelt": (
+            config["Options"]["option_snowmelt"].lower().strip()
         ),
     }
 

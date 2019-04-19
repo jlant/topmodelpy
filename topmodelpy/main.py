@@ -13,6 +13,8 @@ This module contains functionality that:
         - Write output *.csv file of results
         - Plot output
 """
+import pandas as pd
+from pathlib import PurePath
 from topmodelpy import (hydrocalcs,
                         modelconfigfile,
                         parametersfile,
@@ -32,14 +34,12 @@ def topmodelpy(configfile, options):
     :type options: Click.obj
     """
 
-    configdata = modelconfigfile.read(configfile)
-    parameters, timeseries, twi = read_input_files(configdata)
+    config_data = modelconfigfile.read(configfile)
+    parameters, timeseries, twi = read_input_files(config_data)
 
-    preprocessed_data = preprocess(parameters, timeseries, twi)
+    preprocessed_data = preprocess(config_data, parameters, timeseries, twi)
     topmodel_data = run_topmodel(parameters, twi, preprocessed_data)
-    import pdb
-    pdb.set_trace()
-    postprocess(timeseries, preprocessed_data, topmodel_data)
+    postprocess(config_data, timeseries, preprocessed_data, topmodel_data)
 
 
 def read_input_files(configdata):
@@ -62,7 +62,7 @@ def read_input_files(configdata):
     return parameters, timeseries, twi
 
 
-def preprocess(parameters, timeseries, twi):
+def preprocess(config_data, parameters, timeseries, twi):
     """Preprocess data for topmodel run.
 
     Calculate timestep daily fraction, usually 1 for daily timesteps
@@ -104,20 +104,29 @@ def preprocess(parameters, timeseries, twi):
         )
         pet = pet * timestep_daily_fraction
 
-    # Calculate the adjusted precipitation based on snowmelt
-    # Note: snowmelt function needs temperatures in Fahrenheit
-    snowprecip, snowmelt, snowpack = hydrocalcs.snowmelt(
-        timeseries["precipitation"].to_numpy(),
-        timeseries["temperature"].to_numpy() * (9/5) + 32,
-        parameters["snowmelt_temperature_cutoff"]["value"],
-        parameters["snowmelt_rate_coeff_with_rain"]["value"],
-        parameters["snowmelt_rate_coeff"]["value"],
-        timestep_daily_fraction
-    )
+    # If snowmelt option is turned on, then compute snowmelt and the difference
+    # between the adjusted precip with pet.
+    # Otherwise, just compute the difference between the original precip with
+    # pet.
+    snowprecip, snowmelt, snowpack = None, None, None
+    if config_data["Options"].getboolean("option_snowmelt"):
+        # Calculate the adjusted precipitation based on snowmelt
+        # Note: snowmelt function needs temperatures in Fahrenheit
+        snowprecip, snowmelt, snowpack = hydrocalcs.snowmelt(
+            timeseries["precipitation"].to_numpy(),
+            timeseries["temperature"].to_numpy() * (9/5) + 32,
+            parameters["snowmelt_temperature_cutoff"]["value"],
+            parameters["snowmelt_rate_coeff_with_rain"]["value"],
+            parameters["snowmelt_rate_coeff"]["value"],
+            timestep_daily_fraction
+        )
 
-    # Calculate the difference between the adjusted precip (snowprecip)
-    # and pet.
-    precip_minus_pet = snowprecip - pet
+        # Calculate the difference between the adjusted precip (snowprecip)
+        # and pet.
+        precip_minus_pet = snowprecip - pet
+    else:
+        # Calculate the difference between the original precip and pet
+        precip_minus_pet = timeseries["precipitation"].to_numpy() - pet
 
     # Calculate the twi weighted mean
     twi_weighted_mean = (
@@ -188,18 +197,46 @@ def run_topmodel(parameters, twi, preprocessed_data):
     return topmodel_data
 
 
-def postprocess(timeseries, preprocessed_data, topmodel_data):
+def postprocess(config_data, timeseries, preprocessed_data, topmodel_data):
     """Postprocess data for output.
 
     Output csv files
     Plot timseries
-
-
     """
-    # To add a new column to pandas dataframe:
-    # df.loc[:, "new_coln_name"] = array of values or a series or a list
-    # Create a copy of the timeseries dataframe and update with additional
-    # data
-    # Rename columns using df.rename(columns={"old": "new"})
+    # Make a copy of the timeseries dataframe and update with additional data
+    output_df = timeseries.copy()
 
-    pass
+    # Add output data of interest to output timeseries
+    if preprocessed_data["snowprecip"] is not None:
+        output_df.loc[:, "snowprecip"] = preprocessed_data["snowprecip"]
+
+    output_df.loc[:, "pet"] = preprocessed_data["pet"]
+    output_df.loc[:, "precip_minus_pet"] = preprocessed_data["precip_minus_pet"]
+    output_df.loc[:, "flow_predicted"] = topmodel_data["flow_predicted"]
+    output_df.loc[:, "saturation_deficit_avgs"] = topmodel_data["saturation_deficit_avgs"]
+
+    # Create the timeseries output file name
+    timeseries_output_file = PurePath(
+        config_data["Outputs"]["output_dir"],
+        config_data["Outputs"]["output_filename"]
+    )
+
+    # Write timeseries output file
+    output_df.to_csv(
+        timeseries_output_file,
+        float_format="%.2f"
+    )
+
+    # Write saturation deficit locals file
+    saturation_deficit_locals_output_file = PurePath(
+        config_data["Outputs"]["output_dir"],
+        config_data["Outputs"]["output_filename_saturation_deficit_locals"]
+    )
+    saturation_deficit_locals_df = (
+        pd.DataFrame(topmodel_data["saturation_deficit_locals"],
+                     index=timeseries.index)
+    )
+    saturation_deficit_locals_df.to_csv(
+        saturation_deficit_locals_output_file,
+        float_format="%.2f"
+    )
