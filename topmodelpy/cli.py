@@ -41,9 +41,10 @@ def run(options, configfile):
     This command takes in the path to model configuration file.
     """
     try:
-        click.echo("Running Topmodel")
-        click.echo("Model configuration file: {}".format(configfile))
+        click.echo("Running model...")
         topmodelpy(configfile, options)
+        click.echo("Finished!")
+        click.echo("Output saved to location specified in model config file.")
     except Exception as err:
         click.echo(err)
         sys.exit(1)

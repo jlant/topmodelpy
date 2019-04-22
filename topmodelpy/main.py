@@ -19,7 +19,8 @@ from topmodelpy import (hydrocalcs,
                         modelconfigfile,
                         parametersfile,
                         timeseriesfile,
-                        twifile)
+                        twifile,
+                        plots)
 from topmodelpy.topmodel import Topmodel
 
 
@@ -98,7 +99,7 @@ def preprocess(config_data, parameters, timeseries, twi):
     else:
         pet = hydrocalcs.pet(
             dates=timeseries.index.to_pydatetime(),
-            temperature=timeseries["temperature"].to_numpy(),
+            temperatures=timeseries["temperature"].to_numpy(),
             latitude=parameters["latitude"]["value"],
             method="hamon"
         )
@@ -203,40 +204,131 @@ def postprocess(config_data, timeseries, preprocessed_data, topmodel_data):
     Output csv files
     Plot timseries
     """
-    # Make a copy of the timeseries dataframe and update with additional data
-    output_df = timeseries.copy()
+    # Get output data
+    output_data = get_output_data(timeseries,
+                                  preprocessed_data,
+                                  topmodel_data)
 
-    # Add output data of interest to output timeseries
+    # Write output data
+    write_output_csv(data=output_data,
+                     filename=PurePath(
+                         config_data["Outputs"]["output_dir"],
+                         config_data["Outputs"]["output_filename"])
+                     )
+
+    # Write output data matrices
+    if config_data["Options"].getboolean("option_write_output_matrices"):
+        write_output_matrices_csv(config_data, timeseries, topmodel_data)
+
+    # Plot output data
+    plot_output_data(data=output_data,
+                     path=config_data["Outputs"]["output_dir"])
+
+
+def get_output_data(timeseries, preprocessed_data, topmodel_data):
+    """Get the data of interest for output.
+
+    Returns a dictionary of all output data of interest.
+    """
+    output_data = {
+        "date": timeseries.index.to_pydatetime(),
+        "temperature (celsius)": timeseries["temperature"].to_numpy(),
+        "precipitation (mm/day)": timeseries["precipitation"].to_numpy(),
+    }
+
     if preprocessed_data["snowprecip"] is not None:
-        output_df.loc[:, "snowprecip"] = preprocessed_data["snowprecip"]
+        output_data["snowprecip (mm/day)"] = preprocessed_data["snowprecip"]
 
-    output_df.loc[:, "pet"] = preprocessed_data["pet"]
-    output_df.loc[:, "precip_minus_pet"] = preprocessed_data["precip_minus_pet"]
-    output_df.loc[:, "flow_predicted"] = topmodel_data["flow_predicted"]
-    output_df.loc[:, "saturation_deficit_avgs"] = topmodel_data["saturation_deficit_avgs"]
+    if "pet" in timeseries.columns:
+        output_data["pet (mm/day)"] = timeseries["pet"].to_numpy()
+    else:
+        output_data["pet (mm/day)"] = preprocessed_data["pet"].to_numpy()
 
-    # Create the timeseries output file name
-    timeseries_output_file = PurePath(
-        config_data["Outputs"]["output_dir"],
-        config_data["Outputs"]["output_filename"]
-    )
+    output_data["precip_minus_pet (mm/day)"] = preprocessed_data["precip_minus_pet"]
 
-    # Write timeseries output file
-    output_df.to_csv(
-        timeseries_output_file,
-        float_format="%.2f"
-    )
+    if "flow_observed" in timeseries.columns:
+        output_data["flow_observed (mm/day)"] = timeseries["flow_observed"].to_numpy()
 
-    # Write saturation deficit locals file
-    saturation_deficit_locals_output_file = PurePath(
-        config_data["Outputs"]["output_dir"],
-        config_data["Outputs"]["output_filename_saturation_deficit_locals"]
-    )
+    output_data["flow_predicted (mm/day)"] = topmodel_data["flow_predicted"]
+    output_data["saturation_deficit_avgs (mm)"] = topmodel_data["saturation_deficit_avgs"]
+
+    return output_data
+
+
+def write_output_csv(data, filename):
+    """Write output timeseries to csv file.
+
+    Creating a pandas Dataframe to ease of saving a csv.
+    """
+    df = pd.DataFrame(data)
+    df.to_csv(filename,
+              index=False,
+              date_format="%Y-%m-%d",
+              float_format="%.2f")
+
+
+def write_output_matrices_csv(config_data, timeseries, topmodel_data):
+    """Write output matrices.
+
+    Matrices are of size: len(timeseries) x len(twi_bins)
+
+    The following are the matrices saved.
+         saturation_deficit_locals
+         unsaturated_zone_storages
+         root_zone_storages
+    """
+    num_cols = topmodel_data["saturation_deficit_locals"].shape[1]
+    header = ["bin_{}".format(i) for i in range(1, num_cols+1)]
+
     saturation_deficit_locals_df = (
         pd.DataFrame(topmodel_data["saturation_deficit_locals"],
                      index=timeseries.index)
     )
-    saturation_deficit_locals_df.to_csv(
-        saturation_deficit_locals_output_file,
-        float_format="%.2f"
+
+    unsaturated_zone_storages_df = (
+        pd.DataFrame(topmodel_data["unsaturated_zone_storages"],
+                     index=timeseries.index)
     )
+
+    root_zone_storages_df = (
+        pd.DataFrame(topmodel_data["root_zone_storages"],
+                     index=timeseries.index)
+    )
+
+    saturation_deficit_locals_df.to_csv(
+        PurePath(
+            config_data["Outputs"]["output_dir"],
+            config_data["Outputs"]["output_filename_saturation_deficit_locals"]
+        ),
+        float_format="%.2f",
+        header=header,
+    )
+
+    unsaturated_zone_storages_df.to_csv(
+        PurePath(
+            config_data["Outputs"]["output_dir"],
+            config_data["Outputs"]["output_filename_unsaturated_zone_storages"]
+        ),
+        float_format="%.2f",
+        header=header,
+    )
+
+    root_zone_storages_df.to_csv(
+        PurePath(
+            config_data["Outputs"]["output_dir"],
+            config_data["Outputs"]["output_filename_root_zone_storages"]
+        ),
+        float_format="%.2f",
+        header=header,
+    )
+
+
+def plot_output_data(data, path):
+    """Plot output timeseries."""
+    dates = data.pop("date")
+    for key, value in data.items():
+        filename = PurePath(path, key.split(" ")[0])
+        plots.plot_timeseries(dates=dates,
+                              values=value,
+                              label=key,
+                              filename=filename)
