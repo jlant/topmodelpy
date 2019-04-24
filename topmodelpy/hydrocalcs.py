@@ -398,3 +398,126 @@ def snowmelt_temperature_index(temperatures,
     https://www.wcc.nrcs.usda.gov/ftpref/wntsc/H&H/snow/COEemSnowmeltRunoff.pdf
     """
     return melt_rate_coeff * (temperatures - temperature_cutoff)
+
+
+def weighted_mean(values, weights):
+    """Calculate the weighted mean.
+
+    :param values: Array of values
+    :type values: numpy.ndarray
+    :param weights: Array of weights
+    :type weights: numpy.ndarray
+    :rtype: float
+    """
+    weighted_mean = (values * weights).sum() / weights.sum()
+
+    return weighted_mean
+
+
+def absolute_error(observed, modeled):
+    """Calculate the absolute error between two arrays.
+
+    :param observed: Array of observed data
+    :type observed: numpy.ndarray
+    :param modeled: Array of modeled data
+    :type modeled: numpy.ndarray
+    :rtype: numpy.ndarray
+    """
+    error = observed - modeled
+
+    return error
+
+
+def mean_squared_error(observed, modeled):
+    """Calculate the mean square error between two arrays.
+
+    :param observed: Array of observed data
+    :type observed: numpy.ndarray
+    :param modeled: Array of modeled data
+    :type modeled: numpy.ndarray
+    :rtype: float
+    """
+    error = absolute_error(observed, modeled)
+    mse = np.mean(error**2)
+
+    return mse
+
+
+def relative_error(observed, modeled):
+    """Calculate the relative change between two arrays.
+
+    :param observed: Array of observed data
+    :type observed: numpy.ndarray
+    :param modeled: Array of modeled data
+    :type modeled: numpy.ndarray
+    :rtype: numpy.ndarray
+    """
+    error = absolute_error(observed, modeled) / observed
+
+    return error
+
+
+def percent_error(observed, modeled):
+    """Calculate the percent error between two arrays.
+
+    :param observed: Array of observed data
+    :type observed: numpy.ndarray
+    :param modeled: Array of modeled data
+    :type modeled: numpy.ndarray
+    :rtype: numpy.ndarray
+    """
+    error = relative_error(observed, modeled) * 100
+
+    return error
+
+
+def percent_difference(observed, modeled):
+    """Calculate the percent difference between two arrays.
+
+    :param observed: Array of observed data
+    :type observed: numpy.ndarray
+    :param modeled: Array of modeled data
+    :type modeled: numpy.ndarray
+    :rtype: numpy.ndarray
+    """
+    mean = np.mean((observed, modeled), axis=0)
+    percent_diff = ((modeled - observed) / mean) * 100
+
+    return percent_diff
+
+
+def r_squared(observed, modeled):
+    """Calculate the Coefficient of Determination. Used to indicate how well
+    data points fit a line or curve. Use numpy.coeff for computation.
+
+    :param observed: Array of observed data
+    :type observed: numpy.ndarray
+    :param modeled: Array of modeled data
+    :type modeled: numpy.ndarray
+    :rtype: float
+    """
+    r = np.corrcoef(observed, modeled)[0, 1]
+    coefficient = r**2
+
+    return coefficient
+
+
+def nash_sutcliffe(observed, modeled):
+    """Calculate the Nash-Sutcliffe (model efficiency coefficient).
+    Used to assess the predictive power of hydrological models.
+
+    E = 1 - sum((observed - modeled) ** 2)) / (sum((observed - mean_observed)**2 )))
+
+    :param observed: Array of observed data
+    :type observed: numpy.ndarray
+    :param modeled: Array of modeled data
+    :type modeled: numpy.ndarray
+    :rtype: float
+    """
+    mean_observed = np.mean(observed)
+    numerator = np.sum((observed - modeled) ** 2)
+    denominator = np.sum((observed - mean_observed)**2)
+    coefficient = 1 - (numerator/denominator)
+
+    return coefficient
+

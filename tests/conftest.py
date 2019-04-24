@@ -308,3 +308,13 @@ def twi_file_invalid_proportion():
 4,0.05,0.30,30
 5,0.06,0.22,20
 """)
+
+
+@pytest.fixture(scope="module")
+def observed_data():
+    return np.array([55.7, 62.0, 65.5, 64.7, 61.1])
+
+
+@pytest.fixture(scope="module")
+def modeled_data():
+    return np.array([55.5, 62.1, 65.3, 64.4, 61.2])

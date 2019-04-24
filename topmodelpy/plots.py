@@ -2,21 +2,27 @@
 
 """
 
-from datetime import datetime
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import mpld3
+from pandas.plotting import register_matplotlib_converters
 import numpy as np
 from scipy import stats
-from textwrap import wrap
 
+from topmodelpy import hydrocalcs
+
+
+# Register for pandas
+register_matplotlib_converters()
 
 COLORS = {
     "temperature": "orange",
-    "precipitation": "SkyBlue",
-    "flow_observed": "gray",
+    "precipitation": "navy",
+    "pet": "green",
+    "precip_minus_pet": "darkgreen",
+    "flow_observed": "darkblue",
     "flow_predicted": "blue",
-    "saturation_deficit_avgs": "black",
+    "saturation_deficit_avgs": "gray",
 }
 
 
@@ -67,19 +73,21 @@ class MousePositionDatePlugin(mpld3.plugins.PluginBase):
         }
 
 
-def plot_timeseries_html(dates, values, name, units):
+def plot_timeseries_html(dates, values, label):
     """Return an html string of the figure"""
 
     fig, ax = plt.subplots(subplot_kw=dict(axisbg="#EEEEEE"))
     fig.set_size_inches(12, 10)
 
-    if COLORS.get(name):
-        colorstr = COLORS.get(name)
-    else:
-        colorstr = "k"
+    colorstr = "k"
+    for key, value in COLORS.items():
+        if key in label:
+            colorstr = value
+
+    label = label.replace("_", " ").capitalize()
 
     ax.grid(color="white", linestyle="solid")
-    ax.set_title("{0} ({1})".format(name, units), fontsize=20)
+    ax.set_title("{}".format(label), fontsize=20)
 
     ax.plot(dates, values, color=colorstr, linewidth=2)
 
@@ -95,18 +103,17 @@ def plot_timeseries(dates, values, label, filename):
     fig, ax = plt.subplots()
     fig.set_size_inches(12, 10)
 
+    colorstr = "k"
+    for key, value in COLORS.items():
+        if key in label:
+            colorstr = value
+
     label = label.replace("_", " ").capitalize()
 
     ax.grid()
     ax.set_title(label)
     ax.set_xlabel("Date")
     ax.set_ylabel(label)
-
-    for key, value in COLORS.items():
-        if label in key:
-            colorstr = value
-        else:
-            colorstr = "k"
 
     ax.plot(dates, values, linewidth=2, color=colorstr)
 
@@ -122,11 +129,11 @@ def plot_timeseries(dates, values, label, filename):
     min = np.round(np.min(values), 2)
 
     text = (
-        "mean = {0}\n"
-        "median = {1}\n"
-        "mode = {2}\n"
-        "max = {3}\n"
-        "min = {4}\n"
+        "Mean = {0}\n"
+        "Median = {1}\n"
+        "Mode = {2}\n"
+        "Max = {3}\n"
+        "Min = {4}"
         "".format(mean, median, mode, max, min)
     )
 
@@ -144,5 +151,84 @@ def plot_timeseries(dates, values, label, filename):
             verticalalignment="top",
             horizontalalignment="left",
             bbox=patch_properties)
+
+    plt.savefig(filename, format="png")
+
+
+def plot_timeseries_comparison(dates, observed, modeled, label, filename):
+    """Plot difference between timeseries."""
+
+    fig, axes = plt.subplots(2, 1, sharex=True)
+    fig.set_size_inches(12, 10)
+
+    label = label.replace("_", " ").capitalize()
+
+    # Plot comparison on first row
+    axes[0].grid(True)
+    axes[0].set_title("Observed flow vs. Modeled flow")
+    axes[0].set_xlabel("Date")
+    axes[0].set_ylabel(label)
+
+    # Explicitly using matplotlibs new default color palette (blue and orange)
+    axes[0].plot(dates, observed, linewidth=2, color="#1f77b4",
+                 label="Observed")
+    axes[0].plot(dates, modeled, linewidth=2, color="#ff7f0e",
+                 label="Modeled")
+
+    # Legend
+    handles, labels = axes[0].get_legend_handles_labels()
+    legend = axes[0].legend(handles, labels, fancybox=True)
+    legend.get_frame().set_alpha(0.5)
+
+    # Add text of stats to figure
+    nash_sutcliffe = hydrocalcs.nash_sutcliffe(observed, modeled)
+    text_nash_sutcliffe = (
+        "Nash-Sutcliffe = {}"
+        "".format(np.round(nash_sutcliffe), 2)
+    )
+
+    patch_properties = {
+        "boxstyle": "round",
+        "facecolor": "white",
+        "alpha": 0.5
+    }
+
+    axes[0].text(0.05,
+                 0.95,
+                 text_nash_sutcliffe,
+                 transform=axes[0].transAxes,
+                 fontsize=14,
+                 verticalalignment="top",
+                 horizontalalignment="left",
+                 bbox=patch_properties)
+
+    # Plot absolute error on second row
+    absolute_error = hydrocalcs.absolute_error(observed, modeled)
+    axes[1].grid(True)
+    axes[1].set_title("Absolute Error: Observed - Modeled")
+    axes[1].set_xlabel("Date")
+    axes[1].set_ylabel("Error (mm/day)")
+
+    axes[1].plot(dates, absolute_error, linewidth=2, color="black")
+
+    # Rotate and align the tick labels so they look better
+    fig.autofmt_xdate()
+    axes[1].fmt_xdata = mdates.DateFormatter("%Y-%m-%d")
+
+    # Add text of stats to figure
+    mean_squared_error = hydrocalcs.mean_squared_error(observed, modeled)
+    text_mse = (
+        "Mean Squared Error = {}"
+        "".format(np.round(mean_squared_error), 2)
+    )
+
+    axes[1].text(0.05,
+                 0.95,
+                 text_mse,
+                 transform=axes[1].transAxes,
+                 fontsize=14,
+                 verticalalignment="top",
+                 horizontalalignment="left",
+                 bbox=patch_properties)
 
     plt.savefig(filename, format="png")

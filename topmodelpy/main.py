@@ -130,10 +130,8 @@ def preprocess(config_data, parameters, timeseries, twi):
         precip_minus_pet = timeseries["precipitation"].to_numpy() - pet
 
     # Calculate the twi weighted mean
-    twi_weighted_mean = (
-        (twi["twi"] * twi["proportion"]).sum()
-        / twi["proportion"].sum()
-    )
+    twi_weighted_mean = hydrocalcs.weighted_mean(values=twi["twi"],
+                                                 weights=twi["proportion"])
 
     # Return a dict of calculated data
     preprocessed_data = {
@@ -332,3 +330,11 @@ def plot_output_data(data, path):
                               values=value,
                               label=key,
                               filename=filename)
+
+    if "flow_observed (mm/day)" in data.keys():
+        filename = PurePath(path, "flow_observed_vs_flow_predicted")
+        plots.plot_timeseries_comparison(dates=dates,
+                                         observed=data["flow_observed (mm/day)"],
+                                         modeled=data["flow_predicted (mm/day)"],
+                                         label="flow (mm/day)",
+                                         filename=filename)
