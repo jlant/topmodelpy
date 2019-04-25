@@ -43,8 +43,8 @@ def run(options, configfile):
     try:
         click.echo("Running model...")
         topmodelpy(configfile, options)
-        click.echo("Output saved to location specified in model config file.")
         click.echo("Finished!")
+        click.echo("Output saved as specified in the model config file.")
     except Exception as err:
         click.echo(err)
         sys.exit(1)

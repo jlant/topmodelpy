@@ -25,8 +25,8 @@ from topmodelpy.topmodel import Topmodel
 
 
 def topmodelpy(configfile, options):
-    """Reads inputs, preprocesses data, runs Topmodel, and postprocesses
-    results.
+    """Read inputs, preprocesse data, run Topmodel, and postprocess
+    results, write *.csv outputfiles and make plots.
 
     :param configfile: The file path to the model config file that
     contains model specifications
@@ -34,7 +34,6 @@ def topmodelpy(configfile, options):
     :param options: The options sent from the cli
     :type options: Click.obj
     """
-
     config_data = modelconfigfile.read(configfile)
     parameters, timeseries, twi = read_input_files(config_data)
 
@@ -211,8 +210,7 @@ def postprocess(config_data, timeseries, preprocessed_data, topmodel_data):
     write_output_csv(data=output_data,
                      filename=PurePath(
                          config_data["Outputs"]["output_dir"],
-                         config_data["Outputs"]["output_filename"])
-                     )
+                         config_data["Outputs"]["output_filename"]))
 
     # Write output data matrices
     if config_data["Options"].getboolean("option_write_output_matrices"):
