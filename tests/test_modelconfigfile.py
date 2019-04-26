@@ -3,10 +3,10 @@
 import pytest
 from pathlib import Path, PurePath
 
-from topmodelpy.exceptions import (ModelConfigFileErrorInvalidSection,
+from waterpy.exceptions import (ModelConfigFileErrorInvalidSection,
                                    ModelConfigFileErrorInvalidFilePath,
                                    ModelConfigFileErrorInvalidOption)
-from topmodelpy import modelconfigfile
+from waterpy import modelconfigfile
 
 
 def test_modelconfig_obj(modelconfig_obj):

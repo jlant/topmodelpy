@@ -111,8 +111,7 @@ def modelconfig_obj():
 
     config["Options"] = {
         "option_pet": "hamon",
-        "option_snowmelt_with_precip": "heavily_forested",
-        "option_snowmelt_with_no_precip": "temperature_index",
+        "option_snowmelt": "yes",
     }
 
     return config
@@ -139,8 +138,7 @@ def modelconfig_obj_invalid_filepath():
 
     config["Options"] = {
         "option_pet": "hamon",
-        "option_snowmelt_with_precip": "heavily_forested",
-        "option_snowmelt_with_no_precip": "temperature_index",
+        "option_snowmelt": "yes",
     }
 
     return config
@@ -162,8 +160,7 @@ def modelconfig_obj_invalid_options():
 
     config["Options"] = {
         "option_pet": "yes",
-        "option_snowmelt_with_precip": "snow",
-        "option_snowmelt_with_no_precip": "hello",
+        "option_snowmelt": "hello",
     }
 
     return config

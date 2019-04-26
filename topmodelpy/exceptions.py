@@ -45,15 +45,13 @@ class ModelConfigFileErrorInvalidOption(TopmodelpyException):
             "Error with model config file.\n"
             "Invalid option(s):\n"
             "  option_pet = {pet}\n"
-            "  option_snowmelt_with_precip = {snowmelt_with_precip}\n"
-            "  option_snowmelt_with_no_precip = {snowmelt_with_no_precip}\n"
+            "  option_snowmelt = {snowmelt}\n"
             "".format(**invalid_options)
         )
         self.message = self.message + (
             "Valid options (contained in each respective list):\n"
             "  option_pet = {pet}\n"
-            "  option_snowmelt_with_precip = {snowmelt_with_precip}\n"
-            "  option_snowmelt_with_no_precip = {snowmelt_with_no_precip}\n"
+            "  option_snowmelt = {snowmelt}\n"
             "".format(**valid_options)
         )
 
