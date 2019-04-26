@@ -76,8 +76,8 @@ class MousePositionDatePlugin(mpld3.plugins.PluginBase):
 def plot_timeseries_html(dates, values, label):
     """Return an html string of the figure"""
 
-    fig, ax = plt.subplots(subplot_kw=dict(axisbg="#EEEEEE"))
-    fig.set_size_inches(12, 10)
+    fig, ax = plt.subplots(subplot_kw=dict(facecolor="#EEEEEE"))
+    # fig.set_size_inches(12, 10)
 
     colorstr = "k"
     for key, value in COLORS.items():

@@ -20,7 +20,8 @@ from topmodelpy import (hydrocalcs,
                         parametersfile,
                         timeseriesfile,
                         twifile,
-                        plots)
+                        plots,
+                        report)
 from topmodelpy.topmodel import Topmodel
 
 
@@ -220,6 +221,12 @@ def postprocess(config_data, timeseries, preprocessed_data, topmodel_data):
     plot_output_data(data=output_data,
                      path=config_data["Outputs"]["output_dir"])
 
+    # Write report of output data
+    write_output_report(data=output_data,
+                        filename=PurePath(
+                            config_data["Outputs"]["output_dir"],
+                            config_data["Outputs"]["output_report"]))
+
 
 def get_output_data(timeseries, preprocessed_data, topmodel_data):
     """Get the data of interest for output.
@@ -321,18 +328,31 @@ def write_output_matrices_csv(config_data, timeseries, topmodel_data):
 
 def plot_output_data(data, path):
     """Plot output timeseries."""
-    dates = data.pop("date")
     for key, value in data.items():
-        filename = PurePath(path, key.split(" ")[0])
-        plots.plot_timeseries(dates=dates,
-                              values=value,
-                              label=key,
-                              filename=filename)
+        if key != "date":
+            filename = PurePath(path, key.split(" ")[0])
+            plots.plot_timeseries(dates=data["date"],
+                                  values=value,
+                                  label=key,
+                                  filename=filename)
 
     if "flow_observed (mm/day)" in data.keys():
         filename = PurePath(path, "flow_observed_vs_flow_predicted")
-        plots.plot_timeseries_comparison(dates=dates,
-                                         observed=data["flow_observed (mm/day)"],
-                                         modeled=data["flow_predicted (mm/day)"],
-                                         label="flow (mm/day)",
-                                         filename=filename)
+        if key != "date":
+            plots.plot_timeseries_comparison(dates=data["date"],
+                                             observed=data["flow_observed (mm/day)"],
+                                             modeled=data["flow_predicted (mm/day)"],
+                                             label="flow (mm/day)",
+                                             filename=filename)
+
+
+def write_output_report(data, filename):
+    """Plot output timeseries."""
+    html_data = {}
+    for key, value in data.items():
+        if key != "date":
+            html_data[key] = plots.plot_timeseries_html(dates=data["date"],
+                                                        values=value,
+                                                        label=key)
+    report.save(html_data, filename)
+
