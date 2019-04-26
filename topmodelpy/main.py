@@ -338,12 +338,11 @@ def plot_output_data(data, path):
 
     if "flow_observed (mm/day)" in data.keys():
         filename = PurePath(path, "flow_observed_vs_flow_predicted")
-        if key != "date":
-            plots.plot_timeseries_comparison(dates=data["date"],
-                                             observed=data["flow_observed (mm/day)"],
-                                             modeled=data["flow_predicted (mm/day)"],
-                                             label="flow (mm/day)",
-                                             filename=filename)
+        plots.plot_timeseries_comparison(dates=data["date"],
+                                         observed=data["flow_observed (mm/day)"],
+                                         modeled=data["flow_predicted (mm/day)"],
+                                         label="flow (mm/day)",
+                                         filename=filename)
 
 
 def write_output_report(data, filename):

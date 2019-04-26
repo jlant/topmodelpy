@@ -122,18 +122,18 @@ def plot_timeseries(dates, values, label, filename):
     ax.fmt_xdata = mdates.DateFormatter("%Y-%m-%d")
 
     # Add text of descriptive stats to figure
-    mean = np.round(np.mean(values), 2)
-    median = np.round(np.median(values), 2)
-    mode = np.round(stats.mode(values)[0][0], 2)
-    max = np.round(np.max(values), 2)
-    min = np.round(np.min(values), 2)
+    mean = np.mean(values)
+    median = np.median(values)
+    mode = stats.mode(values)[0][0]
+    max = np.max(values)
+    min = np.min(values)
 
     text = (
-        "Mean = {0}\n"
-        "Median = {1}\n"
-        "Mode = {2}\n"
-        "Max = {3}\n"
-        "Min = {4}"
+        "Mean = {0:.2f}\n"
+        "Median = {1:.2f}\n"
+        "Mode = {2:.2f}\n"
+        "Max = {3:.2f}\n"
+        "Min = {4:.2f}"
         "".format(mean, median, mode, max, min)
     )
 
@@ -183,8 +183,8 @@ def plot_timeseries_comparison(dates, observed, modeled, label, filename):
     # Add text of stats to figure
     nash_sutcliffe = hydrocalcs.nash_sutcliffe(observed, modeled)
     text_nash_sutcliffe = (
-        "Nash-Sutcliffe = {}"
-        "".format(np.round(nash_sutcliffe), 2)
+        "Nash-Sutcliffe = {:.2f}"
+        "".format(nash_sutcliffe)
     )
 
     patch_properties = {
@@ -218,8 +218,8 @@ def plot_timeseries_comparison(dates, observed, modeled, label, filename):
     # Add text of stats to figure
     mean_squared_error = hydrocalcs.mean_squared_error(observed, modeled)
     text_mse = (
-        "Mean Squared Error = {}"
-        "".format(np.round(mean_squared_error), 2)
+        "Mean Squared Error = {:.2f}"
+        "".format(mean_squared_error)
     )
 
     axes[1].text(0.05,
