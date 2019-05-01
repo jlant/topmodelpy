@@ -202,13 +202,16 @@ def postprocess(config_data, timeseries, preprocessed_data, topmodel_data):
     Output csv files
     Plot timseries
     """
-    # Get output data
-    output_data = get_output_data(timeseries,
-                                  preprocessed_data,
-                                  topmodel_data)
+    # Get output timeseries data
+    output_df = get_output_dataframe(timeseries,
+                                     preprocessed_data,
+                                     topmodel_data)
+
+    # Get output comparison stats
+    output_comparison_data = get_comparison_data(output_df)
 
     # Write output data
-    write_output_csv(data=output_data,
+    write_output_csv(df=output_df,
                      filename=PurePath(
                          config_data["Outputs"]["output_dir"],
                          config_data["Outputs"]["output_filename"]))
@@ -218,55 +221,83 @@ def postprocess(config_data, timeseries, preprocessed_data, topmodel_data):
         write_output_matrices_csv(config_data, timeseries, topmodel_data)
 
     # Plot output data
-    plot_output_data(data=output_data,
+    plot_output_data(df=output_df,
+                     comparison_data=output_comparison_data,
                      path=config_data["Outputs"]["output_dir"])
 
     # Write report of output data
-    write_output_report(data=output_data,
+    write_output_report(df=output_df,
+                        comparison_data=output_comparison_data,
                         filename=PurePath(
                             config_data["Outputs"]["output_dir"],
                             config_data["Outputs"]["output_report"]))
 
 
-def get_output_data(timeseries, preprocessed_data, topmodel_data):
-    """Get the data of interest for output.
+def get_output_dataframe(timeseries, preprocessed_data, topmodel_data):
+    """Get the output data of interest.
 
-    Returns a dictionary of all output data of interest.
+    Returns a Pandas Dataframe of all output data of interest.
     """
-    output_data = {
-        "date": timeseries.index.to_pydatetime(),
-        "temperature (celsius)": timeseries["temperature"].to_numpy(),
-        "precipitation (mm/day)": timeseries["precipitation"].to_numpy(),
-    }
-
+    output_data = {}
     if preprocessed_data["snowprecip"] is not None:
-        output_data["snowprecip (mm/day)"] = preprocessed_data["snowprecip"]
+        output_data["snowprecip"] = preprocessed_data["snowprecip"]
 
-    if "pet" in timeseries.columns:
-        output_data["pet (mm/day)"] = timeseries["pet"].to_numpy()
-    else:
-        output_data["pet (mm/day)"] = preprocessed_data["pet"].to_numpy()
+    if "pet" not in timeseries.columns:
+        output_data["pet"] = preprocessed_data["pet"]
 
-    output_data["precip_minus_pet (mm/day)"] = preprocessed_data["precip_minus_pet"]
+    output_data["precip_minus_pet"] = preprocessed_data["precip_minus_pet"]
 
-    if "flow_observed" in timeseries.columns:
-        output_data["flow_observed (mm/day)"] = timeseries["flow_observed"].to_numpy()
+    output_data["flow_predicted"] = topmodel_data["flow_predicted"]
+    output_data["saturation_deficit_avgs"] = topmodel_data["saturation_deficit_avgs"]
 
-    output_data["flow_predicted (mm/day)"] = topmodel_data["flow_predicted"]
-    output_data["saturation_deficit_avgs (mm)"] = topmodel_data["saturation_deficit_avgs"]
+    output_df = timeseries.assign(**output_data)
 
-    return output_data
+    return output_df
 
 
-def write_output_csv(data, filename):
+def get_comparison_data(output_df):
+    """Get comparison statistics.
+
+    Return a dictionary of descriptive statistics and if output data contains
+    an observed flow, then compute the Nash-Sutcliffe statistic.
+    """
+    output_comparison_data = {}
+    if "flow_observed" in output_df.columns:
+        output_comparison_data["nash_sutcliffe"] = (
+            hydrocalcs.nash_sutcliffe(
+                observed=output_df["flow_observed"].to_numpy(),
+                modeled=output_df["flow_predicted"].to_numpy())
+        )
+        output_comparison_data["absolute_error"] = (
+            hydrocalcs.absolute_error(
+                observed=output_df["flow_observed"].to_numpy(),
+                modeled=output_df["flow_predicted"].to_numpy())
+        )
+        output_comparison_data["mean_squared_error"] = (
+            hydrocalcs.mean_squared_error(
+                observed=output_df["flow_observed"].to_numpy(),
+                modeled=output_df["flow_predicted"].to_numpy())
+        )
+
+    return output_comparison_data
+
+
+def write_output_csv(df, filename):
     """Write output timeseries to csv file.
 
     Creating a pandas Dataframe to ease of saving a csv.
     """
-    df = pd.DataFrame(data)
+    df.rename = {
+        "temperature": "temperature (celsius)",
+        "precipitation": "precipitation (mm/day)",
+        "pet": "pet (mm/day)",
+        "precip_minus_pet": "precip_minus_pet (mm/day)",
+        "flow_observed": "flow_observed (mm/day)",
+        "flow_predicted": "flow_predicted (mm/day)",
+        "saturation_deficit_avgs": "saturation_deficit_avgs (mm/day)",
+        "snowprecip": "snowprecip (mm/day)",
+    }
     df.to_csv(filename,
-              index=False,
-              date_format="%Y-%m-%d",
               float_format="%.2f")
 
 
@@ -326,32 +357,53 @@ def write_output_matrices_csv(config_data, timeseries, topmodel_data):
     )
 
 
-def plot_output_data(data, path):
+def plot_output_data(df, comparison_data, path):
     """Plot output timeseries."""
-    for key, value in data.items():
-        if key != "date":
-            filename = PurePath(path, key.split(" ")[0])
-            plots.plot_timeseries(dates=data["date"],
-                                  values=value,
-                                  label=key,
-                                  filename=filename)
+    for key, series in df.iteritems():
+        filename = PurePath(path, "{}.png".format(key.split(" ")[0]))
+        plots.plot_timeseries(
+            dates=df.index.to_pydatetime(),
+            values=series.values,
+            mean=series.mean(),
+            median=series.median(),
+            mode=series.mode()[0],
+            max=series.max(),
+            min=series.min(),
+            label="{} (mm/day)".format(key),
+            filename=filename)
 
-    if "flow_observed (mm/day)" in data.keys():
-        filename = PurePath(path, "flow_observed_vs_flow_predicted")
-        plots.plot_timeseries_comparison(dates=data["date"],
-                                         observed=data["flow_observed (mm/day)"],
-                                         modeled=data["flow_predicted (mm/day)"],
-                                         label="flow (mm/day)",
-                                         filename=filename)
+    if "flow_observed" in df.columns:
+        filename = PurePath(path, "flow_observed_vs_flow_predicted.png")
+        plots.plot_timeseries_comparison(
+            dates=df.index.to_pydatetime(),
+            observed=df["flow_observed"].to_numpy(),
+            modeled=df["flow_predicted"].to_numpy(),
+            absolute_error=comparison_data["absolute_error"],
+            nash_sutcliffe=comparison_data["nash_sutcliffe"],
+            mean_squared_error=comparison_data["mean_squared_error"],
+            label="flow (mm/day)",
+            filename=filename)
 
 
-def write_output_report(data, filename):
-    """Plot output timeseries."""
-    html_data = {}
-    for key, value in data.items():
-        if key != "date":
-            html_data[key] = plots.plot_timeseries_html(dates=data["date"],
-                                                        values=value,
-                                                        label=key)
-    report.save(html_data, filename)
+def write_output_report(df, comparison_data, filename):
+    """Write an html web page with interactive plots."""
+    plots_html_data = {}
+    for key, value in df.iteritems():
+        plots_html_data[key] = plots.plot_timeseries_html(
+            dates=df.index.to_pydatetime(),
+            values=value,
+            label="{} (mm/day)".format(key))
 
+    if comparison_data:
+        comparison_plot_html = plots.plot_timeseries_comparison_html(
+            dates=df.index.to_pydatetime(),
+            observed=df["flow_observed"].to_numpy(),
+            modeled=df["flow_predicted"].to_numpy(),
+            absolute_error=comparison_data["absolute_error"],
+            label="flow (mm/day)")
+        comparison_data.update({"comparison_plot_html": comparison_plot_html})
+
+    report.save(df=df,
+                plots=plots_html_data,
+                comparison_data=comparison_data,
+                filename=filename)

@@ -77,7 +77,7 @@ def plot_timeseries_html(dates, values, label):
     """Return an html string of the figure"""
 
     fig, ax = plt.subplots(subplot_kw=dict(facecolor="#EEEEEE"))
-    # fig.set_size_inches(12, 10)
+    fig.set_size_inches(10, 6)
 
     colorstr = "k"
     for key, value in COLORS.items():
@@ -97,9 +97,51 @@ def plot_timeseries_html(dates, values, label):
     return mpld3.fig_to_html(fig)
 
 
-def plot_timeseries(dates, values, label, filename):
-    """Plot timeseries."""
+def plot_timeseries_comparison_html(dates, observed, modeled, absolute_error, label):
+    """Return an html string of the figure"""
 
+    fig, axes = plt.subplots(2, 1, sharex=True, subplot_kw=dict(facecolor="#EEEEEE"))
+    fig.set_size_inches(10, 8)
+
+    # Connect plugin
+    mpld3.plugins.connect(fig, MousePositionDatePlugin())
+
+    # Plot comparison on first row
+    axes[0].grid(True)
+    axes[0].set_title("Observed flow vs. Modeled flow")
+    axes[0].set_xlabel("Date")
+    axes[0].set_ylabel(label)
+
+    # Explicitly using matplotlibs new default color palette (blue and orange)
+    axes[0].plot(dates, observed, linewidth=2, color="#1f77b4",
+                 label="Observed")
+    axes[0].plot(dates, modeled, linewidth=2, color="#ff7f0e",
+                 label="Modeled")
+
+    # Legend
+    handles, labels = axes[0].get_legend_handles_labels()
+    legend = axes[0].legend(handles, labels, fancybox=True)
+    legend.get_frame().set_alpha(0.5)
+
+    axes[1].plot(dates, absolute_error, linewidth=2, color="black")
+
+    # Rotate and align the tick labels so they look better
+    fig.autofmt_xdate()
+    axes[1].fmt_xdata = mdates.DateFormatter("%Y-%m-%d")
+
+    return mpld3.fig_to_html(fig)
+
+
+def plot_timeseries(dates,
+                    values,
+                    mean,
+                    median,
+                    mode,
+                    max,
+                    min,
+                    label,
+                    filename):
+    """Plot timeseries."""
     fig, ax = plt.subplots()
     fig.set_size_inches(12, 10)
 
@@ -122,12 +164,6 @@ def plot_timeseries(dates, values, label, filename):
     ax.fmt_xdata = mdates.DateFormatter("%Y-%m-%d")
 
     # Add text of descriptive stats to figure
-    mean = np.mean(values)
-    median = np.median(values)
-    mode = stats.mode(values)[0][0]
-    max = np.max(values)
-    min = np.min(values)
-
     text = (
         "Mean = {0:.2f}\n"
         "Median = {1:.2f}\n"
@@ -155,7 +191,14 @@ def plot_timeseries(dates, values, label, filename):
     plt.savefig(filename, format="png")
 
 
-def plot_timeseries_comparison(dates, observed, modeled, label, filename):
+def plot_timeseries_comparison(dates,
+                               observed,
+                               modeled,
+                               absolute_error,
+                               nash_sutcliffe,
+                               mean_squared_error,
+                               label,
+                               filename):
     """Plot difference between timeseries."""
 
     fig, axes = plt.subplots(2, 1, sharex=True)
@@ -181,7 +224,6 @@ def plot_timeseries_comparison(dates, observed, modeled, label, filename):
     legend.get_frame().set_alpha(0.5)
 
     # Add text of stats to figure
-    nash_sutcliffe = hydrocalcs.nash_sutcliffe(observed, modeled)
     text_nash_sutcliffe = (
         "Nash-Sutcliffe = {:.2f}"
         "".format(nash_sutcliffe)
@@ -203,7 +245,6 @@ def plot_timeseries_comparison(dates, observed, modeled, label, filename):
                  bbox=patch_properties)
 
     # Plot absolute error on second row
-    absolute_error = hydrocalcs.absolute_error(observed, modeled)
     axes[1].grid(True)
     axes[1].set_title("Absolute Error: Observed - Modeled")
     axes[1].set_xlabel("Date")
@@ -216,7 +257,6 @@ def plot_timeseries_comparison(dates, observed, modeled, label, filename):
     axes[1].fmt_xdata = mdates.DateFormatter("%Y-%m-%d")
 
     # Add text of stats to figure
-    mean_squared_error = hydrocalcs.mean_squared_error(observed, modeled)
     text_mse = (
         "Mean Squared Error = {:.2f}"
         "".format(mean_squared_error)

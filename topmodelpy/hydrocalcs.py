@@ -10,6 +10,7 @@ https://www.wcc.nrcs.usda.gov/ftpref/wntsc/H&H/snow/COEemSnowmeltRunoff.pdf
 """
 
 import numpy as np
+from scipy import stats
 
 
 def pet(dates, temperatures, latitude, method="hamon"):

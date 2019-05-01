@@ -16,18 +16,76 @@
         <div class="col-md-12">
           <h3>Outputs</h3>
           <ol>
-            {% for key, value in data.items() %}
-            <li><a href="#{{key}}">{{key}}</a></li>
+            {% for column in df.columns %}
+            <li><a href="#{{key}}">{{ column }}</a></li>
             {% endfor %}
           </ol>
         <div>
       <div>
       <div class="row">
         <div class="col-md-12">
-          <h3>Plots</h3>
-          {% for key, value in data.items() %}
-          {{value}}
+          <h3>Interactive Plots</h3>
+          {% for key, value in plots.items() %}
+          <div>{{ value }}</div>
+          <h3>Descriptive Statistics</h3>
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Statistic</th>
+                <th scope="col">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Mean</th>
+                <td>{{ df[key].mean() }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Median</th>
+                <td>{{ df[key].median() }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Mode</th>
+                <td>{{ df[key].mode() }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Max</th>
+                <td>{{ df[key].max() }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Min</th>
+                <td>{{ df[key].min() }}</td>
+              </tr>
+            </tbody>
+          </table>
           {% endfor %}
+        <div>
+      <div>
+      <div class="row">
+        <div class="col-md-12">
+          {% if comparison_data %}
+          <h3>Comparison Plot</h3>
+          <div>{{ comparison_data["comparison_plot_html"] }}</div>
+          <h3>Descriptive Statistics</h3>
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Statistic</th>
+                <th scope="col">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Nash-Sutcliffe</th>
+                <td>{{ comparison_data["nash_sutcliffe"] }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Mean Squared Error</th>
+                <td>{{ comparison_data["mean_squared_error"] }}</td>
+              </tr>
+            </tbody>
+          </table>
+          {% endif %}
         <div>
       <div>
     <div>
