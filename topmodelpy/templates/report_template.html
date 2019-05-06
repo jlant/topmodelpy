@@ -24,49 +24,10 @@
       <div>
       <div class="row">
         <div class="col-md-12">
-          <h3>Interactive Plots</h3>
-          {% for key, value in plots.items() %}
-          <div>{{ value }}</div>
-          <h3>Descriptive Statistics</h3>
-          <table class="table table-hover">
-            <thead>
-              <tr>
-                <th scope="col">Statistic</th>
-                <th scope="col">Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th scope="row">Mean</th>
-                <td>{{ df[key].mean() }}</td>
-              </tr>
-              <tr>
-                <th scope="row">Median</th>
-                <td>{{ df[key].median() }}</td>
-              </tr>
-              <tr>
-                <th scope="row">Mode</th>
-                <td>{{ df[key].mode() }}</td>
-              </tr>
-              <tr>
-                <th scope="row">Max</th>
-                <td>{{ df[key].max() }}</td>
-              </tr>
-              <tr>
-                <th scope="row">Min</th>
-                <td>{{ df[key].min() }}</td>
-              </tr>
-            </tbody>
-          </table>
-          {% endfor %}
-        <div>
-      <div>
-      <div class="row">
-        <div class="col-md-12">
           {% if comparison_data %}
           <h3>Comparison Plot</h3>
           <div>{{ comparison_data["comparison_plot_html"] }}</div>
-          <h3>Descriptive Statistics</h3>
+          <h5>Descriptive Statistics</h5>
           <table class="table table-hover">
             <thead>
               <tr>
@@ -77,15 +38,62 @@
             <tbody>
               <tr>
                 <th scope="row">Nash-Sutcliffe</th>
-                <td>{{ comparison_data["nash_sutcliffe"] }}</td>
+                <td>{{ "{0:0.2f}".format(comparison_data["nash_sutcliffe"]) }}</td>
               </tr>
               <tr>
                 <th scope="row">Mean Squared Error</th>
-                <td>{{ comparison_data["mean_squared_error"] }}</td>
+                <td>{{ "{0:0.2f}".format(comparison_data["mean_squared_error"]) }}</td>
               </tr>
             </tbody>
           </table>
+          <h3>Flow Duration Curve Comparison</h3>
+          <div>{{ flow_duration_curve_data["flow_duration_curve_comparison_html"] }}</div>
           {% endif %}
+        <div>
+      <div>
+      <div class="row">
+        <div class="col-md-12">
+          <h3>Interactive Plots</h3>
+          {% for key, value in plots.items() %}
+          <div>{{ value }}</div>
+          <h5>Descriptive Statistics</h5>
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Statistic</th>
+                <th scope="col">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Mean</th>
+                <td>{{ "{0:0.2f}".format(df[key].mean()) }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Median</th>
+                <td>{{ "{0:0.2f}".format(df[key].median()) }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Mode</th>
+                <td>{{ "{0:0.2f}".format(df[key].mode().values[0]) }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Max</th>
+                <td>{{ "{0:0.2f}".format(df[key].max()) }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Min</th>
+                <td>{{ "{0:0.2f}".format(df[key].min()) }}</td>
+              </tr>
+            </tbody>
+          </table>
+          {% endfor %}
+        <div>
+      <div>
+      <div class="row">
+        <div class="col-md-12">
+          <h3>Flow Duration Curve</h3>
+          <div>{{ flow_duration_curve_data["flow_duration_curve_html"] }}</div>
         <div>
       <div>
     <div>

@@ -522,3 +522,29 @@ def nash_sutcliffe(observed, modeled):
 
     return coefficient
 
+
+def flow_duration(values):
+    """Calculate the exceedance probabilities for a set of values for use in
+    plotting a flow duration curve.
+
+    :param observed: Array of flow values
+    :type observed: numpy.ndarray
+    :param modeled: Array of modeled data
+    :return tuple: Tuple of probabilities, sorted values
+    :rtype: tuple
+    """
+    # Sort the values
+    values_sorted = np.sort(values)
+
+    # Rank data from smallest to largest
+    ranks = stats.rankdata(values_sorted, method="average")
+
+    # Reverse the order
+    ranks = ranks[::-1]
+
+    # Compute the exceedance probabilities
+    probabilities = (
+        [(ranks[i] / (len(values) + 1)) * 100 for i in range(len(values))]
+    )
+
+    return probabilities, values_sorted

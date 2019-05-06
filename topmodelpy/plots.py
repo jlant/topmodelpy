@@ -123,11 +123,74 @@ def plot_timeseries_comparison_html(dates, observed, modeled, absolute_error, la
     legend = axes[0].legend(handles, labels, fancybox=True)
     legend.get_frame().set_alpha(0.5)
 
+    axes[1].grid(True)
+    axes[1].set_title("Absolute Error: Observed - Modeled")
+    axes[1].set_xlabel("Date")
+    axes[1].set_ylabel("Error (mm/day)")
+
     axes[1].plot(dates, absolute_error, linewidth=2, color="black")
 
     # Rotate and align the tick labels so they look better
     fig.autofmt_xdate()
     axes[1].fmt_xdata = mdates.DateFormatter("%Y-%m-%d")
+
+    return mpld3.fig_to_html(fig)
+
+
+def plot_flow_duration_curve_html(values, label):
+    """Return an html string of the figure"""
+
+    fig, ax = plt.subplots(subplot_kw=dict(facecolor="#EEEEEE"))
+    fig.set_size_inches(10, 6)
+
+    label = label.replace("_", " ").capitalize()
+
+    ax.grid(color="white", linestyle="solid")
+    ax.set_title("Flow Duration Curve: Observed vs. Modeled", fontsize=20)
+    ax.set_xlabel("Exceedance Probability (%)")
+    ax.set_ylabel(label)
+    ax.set_yscale("log")
+
+    probabilities, values_sorted = hydrocalcs.flow_duration(values)
+
+    ax.plot(probabilities, values_sorted, linewidth=2)
+
+    # Connect plugin
+    mpld3.plugins.connect(fig, MousePositionDatePlugin())
+
+    return mpld3.fig_to_html(fig)
+
+
+def plot_flow_duration_curve_comparison_html(observed, modeled, label):
+    """Plot flow duration curve."""
+
+    fig, ax = plt.subplots(subplot_kw=dict(facecolor="#EEEEEE"))
+    fig.set_size_inches(10, 6)
+
+    label = label.replace("_", " ").capitalize()
+
+    ax.grid(color="white", linestyle="solid")
+    ax.set_title("Flow Duration Curve: Observed vs. Modeled", fontsize=20)
+    ax.set_xlabel("Exceedance Probability (%)")
+    ax.set_ylabel(label)
+    ax.set_yscale("log")
+
+    observed_prob, observed_sorted = hydrocalcs.flow_duration(observed)
+    modeled_prob, modeled_sorted = hydrocalcs.flow_duration(modeled)
+
+    # Explicitly using matplotlibs new default color palette (blue and orange)
+    ax.plot(observed_prob, observed_sorted, linewidth=2, color="#1f77b4",
+            label="Observed")
+    ax.plot(modeled_prob, modeled_sorted, linewidth=2, color="#ff7f0e",
+            label="Modeled")
+
+    # Legend
+    handles, labels = ax.get_legend_handles_labels()
+    legend = ax.legend(handles, labels, fancybox=True)
+    legend.get_frame().set_alpha(0.5)
+
+    # Connect plugin
+    mpld3.plugins.connect(fig, MousePositionDatePlugin())
 
     return mpld3.fig_to_html(fig)
 
@@ -272,3 +335,56 @@ def plot_timeseries_comparison(dates,
                  bbox=patch_properties)
 
     plt.savefig(filename, format="png")
+
+
+def plot_flow_duration_curve(values, label, filename):
+    """Plot flow duration curve."""
+    fig, ax = plt.subplots()
+    fig.set_size_inches(12, 10)
+
+    label = label.replace("_", " ").capitalize()
+
+    ax.grid()
+    ax.set_title("Flow Duration Curve")
+    ax.set_xlabel("Exceedance Probability (%)")
+    ax.set_ylabel(label)
+    ax.set_yscale("log")
+
+    probabilities, values_sorted = hydrocalcs.flow_duration(values)
+
+    ax.plot(probabilities, values_sorted, linewidth=2)
+
+    plt.savefig(filename, format="png")
+
+
+
+def plot_flow_duration_curve_comparison(observed, modeled, label, filename):
+    """Plot flow duration curve."""
+    fig, ax = plt.subplots()
+    fig.set_size_inches(12, 10)
+
+    label = label.replace("_", " ").capitalize()
+
+    ax.grid()
+    ax.set_title("Flow Duration Curve: Observed vs. Modeled")
+    ax.set_xlabel("Exceedance Probability (%)")
+    ax.set_ylabel(label)
+    ax.set_yscale("log")
+
+    observed_prob, observed_sorted = hydrocalcs.flow_duration(observed)
+    modeled_prob, modeled_sorted = hydrocalcs.flow_duration(modeled)
+
+    # Explicitly using matplotlibs new default color palette (blue and orange)
+    ax.plot(observed_prob, observed_sorted, linewidth=2, color="#1f77b4",
+            label="Observed")
+    ax.plot(modeled_prob, modeled_sorted, linewidth=2, color="#ff7f0e",
+            label="Modeled")
+
+    # Legend
+    handles, labels = ax.get_legend_handles_labels()
+    legend = ax.legend(handles, labels, fancybox=True)
+    legend.get_frame().set_alpha(0.5)
+
+    plt.savefig(filename, format="png")
+
+

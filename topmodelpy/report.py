@@ -5,7 +5,7 @@
 from jinja2 import PackageLoader, Environment
 
 
-def render_report(df, plots, comparison_data, filename):
+def render_report(df, plots, comparison_data, flow_duration_curve_data, filename):
     """Render an html page of the model output data.
 
     :param data: Data to fill template with
@@ -19,10 +19,11 @@ def render_report(df, plots, comparison_data, filename):
 
     return template.render(df=df,
                            plots=plots,
-                           comparison_data=comparison_data)
+                           comparison_data=comparison_data,
+                           flow_duration_curve_data=flow_duration_curve_data)
 
 
-def save(df, plots, comparison_data, filename):
+def save(df, plots, comparison_data, flow_duration_curve_data, filename):
     """Save summary as a restructured text file.
 
     :param data: Data to fill template with
@@ -31,4 +32,6 @@ def save(df, plots, comparison_data, filename):
     :type filename: string
     """
     with open(filename, "w") as f:
-        f.write(render_report(df, plots, comparison_data, filename))
+        f.write(
+            render_report(df, plots, comparison_data, flow_duration_curve_data, filename)
+        )

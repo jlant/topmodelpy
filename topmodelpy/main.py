@@ -372,8 +372,12 @@ def plot_output_data(df, comparison_data, path):
             label="{} (mm/day)".format(key),
             filename=filename)
 
+    plots.plot_flow_duration_curve(
+        values=df["flow_predicted"].to_numpy(),
+        label="flow_predicted (mm/day)",
+        filename=PurePath(path, "flow_duration_curve.png"))
+
     if "flow_observed" in df.columns:
-        filename = PurePath(path, "flow_observed_vs_flow_predicted.png")
         plots.plot_timeseries_comparison(
             dates=df.index.to_pydatetime(),
             observed=df["flow_observed"].to_numpy(),
@@ -382,7 +386,13 @@ def plot_output_data(df, comparison_data, path):
             nash_sutcliffe=comparison_data["nash_sutcliffe"],
             mean_squared_error=comparison_data["mean_squared_error"],
             label="flow (mm/day)",
-            filename=filename)
+            filename=PurePath(path, "flow_observed_vs_flow_predicted.png"))
+
+        plots.plot_flow_duration_curve_comparison(
+            observed=df["flow_observed"].to_numpy(),
+            modeled=df["flow_predicted"].to_numpy(),
+            label="flow (mm/day)",
+            filename=PurePath(path, "flow_duration_curved_observed_vs_predicted.png"))
 
 
 def write_output_report(df, comparison_data, filename):
@@ -394,6 +404,12 @@ def write_output_report(df, comparison_data, filename):
             values=value,
             label="{} (mm/day)".format(key))
 
+    flow_duration_curve_data = {
+        "flow_duration_curve_html": plots.plot_flow_duration_curve_html(
+            values=df["flow_predicted"].to_numpy(),
+            label="flow_predicted (mm/day)")
+    }
+
     if comparison_data:
         comparison_plot_html = plots.plot_timeseries_comparison_html(
             dates=df.index.to_pydatetime(),
@@ -403,7 +419,18 @@ def write_output_report(df, comparison_data, filename):
             label="flow (mm/day)")
         comparison_data.update({"comparison_plot_html": comparison_plot_html})
 
+        flow_duration_curve_comparison_hmtl = (
+            plots.plot_flow_duration_curve_comparison_html(
+                observed=df["flow_observed"].to_numpy(),
+                modeled=df["flow_predicted"].to_numpy(),
+                label="flow (mm/day)")
+        )
+        flow_duration_curve_data.update(
+            {"flow_duration_curve_comparison_html": flow_duration_curve_comparison_hmtl}
+        )
+
     report.save(df=df,
                 plots=plots_html_data,
                 comparison_data=comparison_data,
+                flow_duration_curve_data=flow_duration_curve_data,
                 filename=filename)
