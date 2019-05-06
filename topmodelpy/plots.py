@@ -6,8 +6,6 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import mpld3
 from pandas.plotting import register_matplotlib_converters
-import numpy as np
-from scipy import stats
 
 from topmodelpy import hydrocalcs
 
@@ -252,6 +250,7 @@ def plot_timeseries(dates,
             bbox=patch_properties)
 
     plt.savefig(filename, format="png")
+    plt.close()
 
 
 def plot_timeseries_comparison(dates,
@@ -335,6 +334,7 @@ def plot_timeseries_comparison(dates,
                  bbox=patch_properties)
 
     plt.savefig(filename, format="png")
+    plt.close()
 
 
 def plot_flow_duration_curve(values, label, filename):
@@ -355,7 +355,7 @@ def plot_flow_duration_curve(values, label, filename):
     ax.plot(probabilities, values_sorted, linewidth=2)
 
     plt.savefig(filename, format="png")
-
+    plt.close()
 
 
 def plot_flow_duration_curve_comparison(observed, modeled, label, filename):
@@ -386,5 +386,4 @@ def plot_flow_duration_curve_comparison(observed, modeled, label, filename):
     legend.get_frame().set_alpha(0.5)
 
     plt.savefig(filename, format="png")
-
-
+    plt.close()
